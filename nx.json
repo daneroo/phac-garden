@@ -1,0 +1,27 @@
+{
+  "implicitDependencies": {
+    "go.mod": "*"
+  },
+  "npmScope": "phac-garden",
+  "targetDefaults": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ]
+    }
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "@nrwl/nx-cloud",
+      "options": {
+        "cacheableOperations": [
+          "build",
+          "lint",
+          "test",
+          "e2e"
+        ],
+        "accessToken": "MThlZWZiNzUtMDI5Ni00YzhmLWEzYzAtNDBlMzM0ZTMxMWUzfHJlYWQtd3JpdGU="
+      }
+    }
+  }
+}

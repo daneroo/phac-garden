@@ -2,6 +2,9 @@
 
 I gather my documentation notes here, until they can be integrated into a documentation site
 
+- [Logo](project-logo.md)
+- [Monorepo Setup](monorepo.md)
+
 ## Sources
 
 As I integrate the original sources into this repository, I will link them here, and deprecate or archove the original repositories.

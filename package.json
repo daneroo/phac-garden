@@ -1,0 +1,13 @@
+{
+  "name": "phac-garden",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {},
+  "private": true,
+  "devDependencies": {
+    "@nrwl/nx-cloud": "latest",
+    "@nrwl/workspace": "15.9.2",
+    "@nx-go/nx-go": "^2.7.0",
+    "nx": "15.9.2"
+  }
+}
