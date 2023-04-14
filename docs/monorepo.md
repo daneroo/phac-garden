@@ -7,6 +7,11 @@
 
 This create an app with `build` `serve` `test` and `lint` commands.
 
+- `nx run go-time:test`
+- `nx run go-time:lint`
+- `nx run go-time:serve`
+- `nx run go-time:build`: this builds the binary into `dist/apps/go-time`
+
 ```bash
 pnpm add -D @nx-go/nx-go
 
