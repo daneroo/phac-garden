@@ -24,8 +24,8 @@ This is from nx-audiobook...
 # nx run-many --target=XXX
 pnpm lint
 pnpm test
-pnpm run coverage
 pnpm build
+# also have pnpm affected:XXX
 ```
 
 ## Monorepo orchestration

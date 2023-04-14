@@ -3,6 +3,18 @@
 - Nx monorepo on <https://cloud.nx.app/orgs>
   - [Setup](#setup)
 
+## Top level targets
+
+Each of lint,test, build have `nx run-many --target=TARGET --all` in package.json.
+We  also have pnpm affected:XXX
+
+- `pnpm run lint`
+- `pnpm run test`
+- `pnpm run build`
+- `pnpm run affected:lint`
+- `pnpm run affected:test`
+- `pnpm run affected:build`
+
 ## Adding a go project
 
 This create an app with `build` `serve` `test` and `lint` commands.
