@@ -6,7 +6,10 @@
     "preinstall": "npx -y only-allow pnpm",
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
-    "build": "nx run-many --target=build"
+    "build": "nx run-many --target=build",
+    "affected:lint": "pnpm exec nx affected --target=lint --parallel=3",
+    "affected:test": "pnpm exec nx affected --target=test --parallel=3",
+    "affected:build": "pnpm exec nx affected --target=build --parallel=3"
   },
   "private": true,
   "devDependencies": {
