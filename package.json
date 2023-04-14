@@ -2,7 +2,12 @@
   "name": "phac-garden",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "preinstall": "npx -y only-allow pnpm",
+    "lint": "nx run-many --target=lint",
+    "test": "nx run-many --target=test",
+    "build": "nx run-many --target=build"
+  },
   "private": true,
   "devDependencies": {
     "@nrwl/nx-cloud": "latest",

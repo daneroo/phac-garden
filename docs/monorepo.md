@@ -16,6 +16,9 @@ This create an app with `build` `serve` `test` and `lint` commands.
 pnpm add -D @nx-go/nx-go
 
 nx g @nx-go/nx-go:app go-time
+cd apps/go-time
+go mod init github.com/daneroo/phac-garden/apps/go-time
+go mod tidy
 ```
 
 ## Setup

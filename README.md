@@ -9,6 +9,25 @@ As it is a monorepo it will contain many different projects.
 - Static Sites (deployed to Cloud Run)
 - Next.js site(s) (deployed to Cloud Run, and perhaps Vercel)
 
+## TODO
+
+- [ ] site for docs (next.js/nextra) with Logo
+- [ ] use a docker plusing for nx <https://github.com/gperdomor/nx-tools/blob/main/packages/nx-container/README.md>
+
+## Operations
+
+## Operation
+
+This is from nx-audiobook...
+
+```bash
+# nx run-many --target=XXX
+pnpm lint
+pnpm test
+pnpm run coverage
+pnpm build
+```
+
 ## Monorepo orchestration
 
 To manage the different projects inside a single git repository we will be using [Nx](https://nx.dev/).
