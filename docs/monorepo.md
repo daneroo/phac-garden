@@ -15,25 +15,6 @@ We  also have pnpm affected:XXX
 - `pnpm run affected:test`
 - `pnpm run affected:build`
 
-## Adding a next.js project
-
-```bash
-- `pnpm exec nx run site:lint`
-- `pnpm exec nx run site:test`
-- `pnpm exec nx run site:serve`
-- `pnpm exec nx run site:serve:production`
-- `pnpm exec nx run site:export`
-- `nx run site:serve`
-- `nx run site:build`
-```
-
-```bash
-pnpm add -D @nrwl/next
-
-nx g @nrwl/next:app site
-nx g @nrwl/next:lib sharedthings
-```
-
 ## Adding a go project
 
 This create an app with `build` `serve` `test` and `lint` commands.
