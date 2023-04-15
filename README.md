@@ -11,8 +11,9 @@ As it is a monorepo it will contain many different projects.
 
 ## TODO
 
-- [ ] site for docs (next.js/nextra) with Logo
-- [ ] use a docker plusing for nx <https://github.com/gperdomor/nx-tools/blob/main/packages/nx-container/README.md>
+- [ ] site for docs (next.js/nextra/tailwind) with Logo
+  - Using <https://blog.nrwl.io/create-a-next-js-web-app-with-nx-bcf2ab54613>
+- [ ] use a docker plugin for nx <https://github.com/gperdomor/nx-tools/blob/main/packages/nx-container/README.md>
 
 ## Operations
 
