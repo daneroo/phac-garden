@@ -11,16 +11,16 @@ As it is a monorepo it will contain many different projects.
 
 ## TODO
 
-- [ ] site for docs (next.js/nextra) with Logo
-- [ ] use a docker plusing for nx <https://github.com/gperdomor/nx-tools/blob/main/packages/nx-container/README.md>
-
-## Operations
+- [x] site for docs (next.js/nextra) with Logo
+- [ ] realclean target (node modules, dist, .next, etc)
+- [ ] use a docker plugin for nx <https://github.com/gperdomor/nx-tools/blob/main/packages/nx-container/README.md>
 
 ## Operation
 
 This is from nx-audiobook...
 
 ```bash
+pnpm run dev  # nx run site:dev
 # nx run-many --target=XXX
 pnpm lint
 pnpm test

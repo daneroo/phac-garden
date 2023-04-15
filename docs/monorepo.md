@@ -7,9 +7,12 @@
 
 Note: *Having trouble with cache? Try `nx reset`*
 
+Note: *Check for outdated dependencies with `pnpm outdated -r`*, and update them with `pnpm update -r`
+
 Each of lint,test, build have `nx run-many --target=TARGET --all` in package.json.
 We  also have pnpm affected:XXX
 
+- `pnpm run dev` : `nx run site:dev`
 - `pnpm run lint`
 - `pnpm run test`
 - `pnpm run build`
@@ -17,11 +20,14 @@ We  also have pnpm affected:XXX
 - `pnpm run affected:test`
 - `pnpm run affected:build`
 
-## Adding a next.js project
+## Adding a nextra project
 
 I cloned: <https://github.com/shuding/nextra-docs-template>
 
+Another option would have been: <https://github.com/jaredpalmer/nextra-blank-custom-theme>, which has tailwind already setup
+
 ```bash
+pnpm run dev
 ```
 
 ## Adding a go project

@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
+    "dev": "nx run site:dev",
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
     "build": "nx run-many --target=build",
