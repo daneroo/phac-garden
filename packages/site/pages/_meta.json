@@ -1,7 +1,8 @@
 {
   "index": "Introduction",
   "containers": "Containers",
-  "cloudrun": "GCP CLoud Run",
+  "cloudrun": "GCP Cloud Run",
+  "cloudbuild": "GCP Cloud Build",
   "about": {
     "title": "About",
     "type": "page"

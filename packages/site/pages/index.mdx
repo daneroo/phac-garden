@@ -6,6 +6,9 @@ import Image from "next/image";
   <div>
     This is a place where we can share our knowledge and learn from each other.
     We hope you enjoy your stay!
+
+    Feel free to [wander off the path](https://www.poetryfoundation.org/poems/44272/the-road-not-taken) but this is one way through the garden.
+
   </div>
   <div>
     <Image
@@ -17,18 +20,46 @@ import Image from "next/image";
   </div>
 </div>
 
+import { Steps } from "nextra-theme-docs";
+
+<Steps >
+
+### Step 1 - Containers
+
+You will learn what a docker container is, how to build one and how to run it.
+
+### Step 2 - Minumum Viable Cloud
+
+Building on Step 1, you will learn how to deploy your container to the cloud.
+
+For minimal friction, we will use Google Cloud Platform (GCP) and Cloud Run.
+
+### Step 3 - Automating the Steps
+
+Here we will learn how to automate the steps we have taken so far.
+
+So that every time we push to our repository, our container is built and deployed to the cloud.
+
+This will be done using Google Cloud Build
+
+### Step 4 - More to Come
+
+We would love to include the following topics:
+
+- Building stateful containers (databases, caches, etc.)
+- Provisioning to Kubernetes (GKE)
+- Sharing Data
+  - What is an API?
+  - What is Grapql?
+- Security and Zero Trust in Praactice
+- ...
+
+</Steps>
+
 import { Callout } from "nextra-theme-docs";
 
 <Callout type="info">This is a work in progress.</Callout>
 
-- [ ] Get some logos and stuff
-
 ## What is the Garden?
 
 ## Who is it for?
-
-## Path through the Garden
-
-- Docker and Containers
-- GCP first Steps
-- Deploying to Cloud Run

@@ -1,0 +1,39 @@
+# Deploy to vercel
+
+import { Callout } from "nextra-theme-docs";
+
+<Callout type="info">
+  As a _temporary_ measure, we are deploying this site to vercel.
+</Callout>
+
+- First as integrated with vercel's built-in CI/CD
+  - This provides automatic build and deploy of our project (this site)
+  - Automatic production and preview deploys
+- Perhaps later using [deploy-to-vercel-action](https://github.com/BetaHuhn/deploy-to-vercel-action) to have better control and visibility within GitHub
+
+The objective of this is two-fold:
+
+- Demonstrate some features of vercel, such as preview deployments
+- Providing capabilities we have not yet achieved with GCP/Cloudbuild
+
+## Setup
+
+This was done using vercels built-in CI/CD, which is configured in the vercel dashboard.
+
+The only configuration was to indicate that this site's root was in the `packages/site` directory, and it detected that we are using pnpm and nrwl/nx.
+
+The app was then deployed to <https://phac-garden.vercel.app/>
+
+The second step was to deploy to my custom domain (`phac-garden.v.imetrical.com/`).
+
+My original intent to use `phac-garden.v.dl.phac.alpha.canada.ca` was thwarted by the following error:
+
+```txt
+Another Vercel account is using this domain. Please set the following TXT record on _vercel.canada.ca to use phac-garden.dl.phac.alpha.canada.ca in this project.
+```
+
+## References
+
+- [deploy-to-vercel-action](https://github.com/BetaHuhn/deploy-to-vercel-action)
+- [Deploy to Vercel with GitHub Actions (Post)](https://dev.to/estruyf/deploy-your-site-to-vercel-using-github-actions-and-releases-1l3l)
+- [Vercel](https://vercel.com/)

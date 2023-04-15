@@ -4,5 +4,6 @@
   "gke": "GKE",
   "cue": "CUE",
   "project-logo": "Project Logo",
-  "monorepo": "Monorepo"
+  "monorepo": "Monorepo",
+  "deploy-vercel": "Deploy to Vercel"
 }

@@ -11,7 +11,6 @@ As it is a monorepo it will contain many different projects.
 
 ## TODO
 
-- [ ] deploy to vercel (phac-garden.v.dl.phac.alpha.canada.ca)
 - [ ] deploy to cloud run (site and go-time)
   - [ ] as http endpoint
   - [ ] `phac-garden.r.dl.phac.alpha.canada.ca` needs a loadbalancer,...
@@ -19,7 +18,7 @@ As it is a monorepo it will contain many different projects.
   - GitHub Actions
   - vercel
   - cloudbuild
-
+- [ ] Get some logos and stuff
 - [ ] realclean target (node modules, dist, .next, etc)
 - [ ] Wse a docker plugin for nx <https://github.com/gperdomor/nx-tools/blob/main/packages/nx-container/README.md>
 - [ ] Deprecate and/or archive the original repositories.
