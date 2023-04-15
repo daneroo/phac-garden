@@ -1,0 +1,8 @@
+{
+  "dns": "DNS",
+  "gcp-compute": "GCP Compute",
+  "gke": "GKE",
+  "cue": "CUE",
+  "project-logo": "Project Logo",
+  "monorepo": "Monorepo"
+}

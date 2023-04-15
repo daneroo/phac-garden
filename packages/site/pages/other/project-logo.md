@@ -4,7 +4,7 @@
 
 ---
 
-![Sprout emoji](./assets/sprout-emoji.svg)
+The original svg is also contained here, in the file `./assets/sprouting-emoji.svg`
 
 ## Reference
 

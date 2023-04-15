@@ -1,0 +1,4 @@
+{
+  "manual": "Deployed Manually",
+  "cloudbuild": "Deployed Automatically"
+}

@@ -20,7 +20,7 @@ We  also have pnpm affected:XXX
 - `pnpm run affected:test`
 - `pnpm run affected:build`
 
-## Adding a nextra project
+## Adding a Nextra project
 
 I cloned: <https://github.com/shuding/nextra-docs-template>
 

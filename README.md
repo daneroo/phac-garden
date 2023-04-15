@@ -11,9 +11,20 @@ As it is a monorepo it will contain many different projects.
 
 ## TODO
 
-- [x] site for docs (next.js/nextra) with Logo
+- [ ] deploy to vercel (phac-garden.v.dl.phac.alpha.canada.ca)
+- [ ] deploy to cloud run (site and go-time)
+  - [ ] as http endpoint
+  - [ ] `phac-garden.r.dl.phac.alpha.canada.ca` needs a loadbalancer,...
+- [ ] CI/CD
+  - GitHub Actions
+  - vercel
+  - cloudbuild
+
 - [ ] realclean target (node modules, dist, .next, etc)
-- [ ] use a docker plugin for nx <https://github.com/gperdomor/nx-tools/blob/main/packages/nx-container/README.md>
+- [ ] Wse a docker plugin for nx <https://github.com/gperdomor/nx-tools/blob/main/packages/nx-container/README.md>
+- [ ] Deprecate and/or archive the original repositories.
+  - [simple-gke-infra Experiments with Keith (fork)](https://github.com/daneroo/simple-gke-infra)
+  - [Epicenter w/ Chris Allison (fork)](https://github.com/daneroo/phac-epi_center)
 
 ## Operation
 
