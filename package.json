@@ -13,9 +13,10 @@
   },
   "private": true,
   "devDependencies": {
+    "@nrwl/devkit": "^15.9.2",
     "@nrwl/nx-cloud": "latest",
-    "@nrwl/workspace": "15.9.2",
     "@nx-go/nx-go": "^2.7.0",
-    "nx": "15.9.2"
+    "nx": "15.9.2",
+    "typescript": "^5.0.4"
   }
 }

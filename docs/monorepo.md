@@ -5,6 +5,8 @@
 
 ## Top level targets
 
+Note: *Having trouble with cache? Try `nx reset`*
+
 Each of lint,test, build have `nx run-many --target=TARGET --all` in package.json.
 We  also have pnpm affected:XXX
 
@@ -14,6 +16,13 @@ We  also have pnpm affected:XXX
 - `pnpm run affected:lint`
 - `pnpm run affected:test`
 - `pnpm run affected:build`
+
+## Adding a next.js project
+
+I cloned: <https://github.com/shuding/nextra-docs-template>
+
+```bash
+```
 
 ## Adding a go project
 
