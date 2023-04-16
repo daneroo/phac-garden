@@ -13,7 +13,7 @@ import Image from "next/image";
 
 ### Component
 
-import { Logo, LogoVariant } from "../../components/globe";
+import { Logo, LogoVariant } from "../../components/logo";
 
 <Logo />
 
@@ -21,21 +21,36 @@ import { Logo, LogoVariant } from "../../components/globe";
 
 import { Tab, Tabs } from "nextra-theme-docs";
 
-<Tabs items={["DSCO", "Earthy", "Animated"]}>
+<Tabs items={["DSCO", "Earthy", "Simple"]}>
   <Tab>
-    <LogoVariant />
-    ```jsx 
-    import {LogoVariant} from "../../components/globe";
+    <LogoVariant variant="dsco" />
 
-    <LogoVariant />
+    ```jsx
+    import {LogoVariant} from "../../components/logo";
+
+    <LogoVariant variant="dsco" />
+    ```
+
+  </Tab>
+  <Tab>
+    <LogoVariant variant="earthy" />
+
+    ```jsx
+    import {LogoVariant} from "../../components/logo";
+
+    <LogoVariant variant="earthy" />
     ```
 
   </Tab>
   <Tab>
     <LogoVariant />
-  </Tab>
-  <Tab>
+
+    ```jsx
+    import {LogoVariant} from "../../components/logo";
+    // default variant
     <LogoVariant />
+    ```
+
   </Tab>
 </Tabs>
 

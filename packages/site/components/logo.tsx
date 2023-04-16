@@ -36,29 +36,48 @@ function Arc({ a = 0, radius = 25, stroke = 'grey' }) {
   )
 }
 
-const odds = [1, 3, 5, 7];
-const evens = [2, 4, 6,];
-const both = [0, 1, 2, 3, 4, 5, 6, 7];
-const like = [-5, -3, -1.2, 1.2, 3, 5];
-
-export function LogoVariant() {
+interface LogoVariantProps {
+  variant?: "simple" | "dsco" | "earthy"; // 👈️ marked optional
+}
+export function LogoVariant({ variant = "simple" }: LogoVariantProps) {
   // To match our logo we use the same coordinate viewBox 0 0 64 64
   // But to make scaling and circle math sane we translate by 32,32 
   // to have the circles (and arcs) centered at 0,0
-  // this is the stroke color of our circle/earth/DSCO ball
+  // stroke is the stroke color of our circle/earth/DSCO ball
   const stroke = "grey"
-  const strokeWidth = 1;
   // radius is the size of our circle/earth/DSCO ball, +/-32 being edge of the viewBox after translation
   const radius = 25;
-  // bainerAngles are the set of angles where our longitude arc-lines are drawn (these match the DSCO Stickers)
-  const bainerAngles = [-56.25, -33.75, -13.5, 13.5, 33.75, 56.25];
-  const longitudeAngles = bainerAngles
-  // const every15Angles = [-75, -60, -45, -30, -15, 0, 15, 30, 45, 60, 75];
-  // const longitudeAngles = every15Angles;
-  // tilt of the globe, 0 is flat, 90 is vertical
-  const tilt = 23.5;
-  // const axisAngles = [0 + tilt, 90 + tilt];
+  const options = {
+    simple: {
+      longitudeAngles: [],
+      tilt: 0,
+      strokeWidth: 1,
+    },
+    dsco: {
+      // These match the DSCO Stickers)
+      longitudeAngles: [-56.25, -33.75, -13.5, 13.5, 33.75, 56.25],
+      tilt: 0,
+      strokeWidth: 1,
+    },
+    earthy: {
+      // every 15 degrees
+      longitudeAngles: [-75, -60, -45, -30, -15, 0, 15, 30, 45, 60, 75],
+      tilt: 23.5,
+      strokeWidth: .3,
+    },
+  };
+  // longitudeAngles are the set of angles where our longitude arc-lines are drawn
+  // tilt is the tilt of the globe in degrees
+  // strokeWidth is the width of the drawn lines
+  const { longitudeAngles, tilt, strokeWidth } = options[variant];
   const axisAngles = [0 + tilt, 90 + tilt];
+  // stubNub is the little stub at the pole (but only for DSCO variant)
+  const stubNub = variant == "dsco" ? (
+    <g transform={`rotate(${axisAngles[0]})`} >
+      <path d={`M 0,${-radius} L 0,${-radius * 1.1}`} stroke={stroke} />
+    </g>
+  ) : null;
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -68,11 +87,7 @@ export function LogoVariant() {
     >
       <g strokeWidth={strokeWidth} fill="none" transform="translate(32,32)">
         <circle r={radius} stroke={stroke} />
-        {axisAngles.slice(0, 1).map((axisAngle, t) => (
-          <g key={t} transform={`rotate(${axisAngle})`} >
-            <path d="M 0,-25 L 0,-28" stroke={stroke} />
-          </g>
-        ))}
+        {stubNub}
         {axisAngles.map((axisAngle, t) => (
           <g key={t} transform={`rotate(${axisAngle})`} >
             {longitudeAngles.map((a, i) => (
