@@ -21,7 +21,7 @@ import { Logo, LogoVariant } from "../../components/logo";
 
 import { Tab, Tabs } from "nextra-theme-docs";
 
-<Tabs items={["DSCO", "Earthy", "Simple"]}>
+<Tabs items={["DSCO", "Earthy", "Animated", "Simple"]}>
   <Tab>
     <LogoVariant variant="dsco" />
 
@@ -39,6 +39,16 @@ import { Tab, Tabs } from "nextra-theme-docs";
     import {LogoVariant} from "../../components/logo";
 
     <LogoVariant variant="earthy" />
+    ```
+
+  </Tab>
+  <Tab>
+    <LogoVariant variant="earthy" animate={true}/>
+
+    ```jsx
+    import {LogoVariant} from "../../components/logo";
+
+    <LogoVariant variant="earthy" animate={true}/>
     ```
 
   </Tab>

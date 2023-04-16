@@ -1,21 +1,5 @@
 import { useState, useEffect } from "react";
 
-// export const AnimArc = () => {
-//   const [count, setCount] = useState(0);
-//   useEffect(() => {
-//     const timer = setTimeout(() => {
-//       // if (count > 100) return;
-//       setCount(count + 1);
-//     }, 200);
-//     return () => clearTimeout(timer);
-//   });
-//   return (
-//     <path
-//       d={`M -1,0 A 1,${Math.sin(angle)} 1   0 ${sweep}   1 0`}
-//       stroke="lime"
-//     />
-//   );
-// };
 
 // Traces a single arc (longitude line like)
 // a is the angle in degrees, range: -90..0..90
@@ -38,8 +22,9 @@ function Arc({ a = 0, radius = 25, stroke = 'grey' }) {
 
 interface LogoVariantProps {
   variant?: "simple" | "dsco" | "earthy"; // 👈️ marked optional
+  animate?: boolean;
 }
-export function LogoVariant({ variant = "simple" }: LogoVariantProps) {
+export function LogoVariant({ variant = "simple", animate = false }: LogoVariantProps) {
   // To match our logo we use the same coordinate viewBox 0 0 64 64
   // But to make scaling and circle math sane we translate by 32,32 
   // to have the circles (and arcs) centered at 0,0
@@ -62,8 +47,9 @@ export function LogoVariant({ variant = "simple" }: LogoVariantProps) {
     earthy: {
       // every 15 degrees
       longitudeAngles: [-75, -60, -45, -30, -15, 0, 15, 30, 45, 60, 75],
+      // longitudeAngles: [0],
       tilt: 23.5,
-      strokeWidth: .3,
+      strokeWidth: .2,
     },
   };
   // longitudeAngles are the set of angles where our longitude arc-lines are drawn
@@ -78,6 +64,17 @@ export function LogoVariant({ variant = "simple" }: LogoVariantProps) {
     </g>
   ) : null;
 
+  const [angleOffset, setAngleOffset] = useState(0);
+  useEffect(() => {
+    if (!animate) return;
+    const timer = setTimeout(() => {
+      // if (count > 100) return;
+      setAngleOffset((angleOffset + .1) % 15);
+    }, 60);
+    return () => clearTimeout(timer);
+  });
+  // this animates the longitude lines, only used for one axis...
+  const offsetLongitudeAngles = longitudeAngles.map((a) => a + angleOffset);
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -88,13 +85,18 @@ export function LogoVariant({ variant = "simple" }: LogoVariantProps) {
       <g strokeWidth={strokeWidth} fill="none" transform="translate(32,32)">
         <circle r={radius} stroke={stroke} />
         {stubNub}
-        {axisAngles.map((axisAngle, t) => (
-          <g key={t} transform={`rotate(${axisAngle})`} >
-            {longitudeAngles.map((a, i) => (
-              <Arc key={i} a={a} radius={radius} stroke={stroke} />
-            ))}
-          </g>
-        ))}
+        {/* replace iteration over axisAngles, so I could animate only one axix */}
+        {/* {axisAngles.map((axisAngle, t) => (  <g/>      ))} */}
+        <g transform={`rotate(${axisAngles[0]})`} >
+          {longitudeAngles.map((a, i) => (
+            <Arc key={i} a={a} radius={radius} stroke={stroke} />
+          ))}
+        </g>
+        <g transform={`rotate(${axisAngles[1]})`} >
+          {offsetLongitudeAngles.map((a, i) => (
+            <Arc key={i} a={a} radius={radius} stroke={stroke} />
+          ))}
+        </g>
       </g>
       {/* This is our Sprout! */}
       <g fill="#83bf4f">
