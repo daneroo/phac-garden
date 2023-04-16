@@ -9,6 +9,22 @@ import Image from "next/image";
   height={200}
 />
 
+There a many ways to use our logo, which was also meant to show flexible uses of SVG in the conxt of a Next.js application.
+
+In this first instance we refer to the image in a file (`/images/garden-logo.svg`)
+and use the `next/image` component to render it.
+
+```jsx
+import Image from "next/image";
+
+<Image
+  src="/images/garden-logo.svg"
+  alt="Garden-Logo"
+  width={200}
+  height={200}
+/>;
+```
+
 ---
 
 ### Component
@@ -16,8 +32,19 @@ import Image from "next/image";
 import { Logo, LogoVariant } from "../../components/logo";
 
 <Logo />
+Here we invoke it from a react component, which has the same content as the svg file,
+but contained in a jsx fragment
+
+```jsx
+import { Logo } from "../../components/logo";
+
+<Logo />;
+```
 
 ### Variants
+
+Finally, we see that having the logo in a component allows us to use it in different ways.
+Including variants, calculations based on props, and even animate the content:
 
 import { Tab, Tabs } from "nextra-theme-docs";
 
@@ -66,6 +93,6 @@ import { Tab, Tabs } from "nextra-theme-docs";
 
 ## Reference
 
-The original svg is also contained here, in the file `./assets/sprouting-emoji.svg`
+The original svg for the sprout is from the Wikimedia Commons, and is also contained here, in the file `./assets/sprouting-emoji.svg`
 
-- [Sprouting emoji](https://en.m.wikipedia.org/wiki/File:Emojione_1F331.svg)
+- [Sprouting emoji (Wikimedia Commons)](https://en.m.wikipedia.org/wiki/File:Emojione_1F331.svg)
