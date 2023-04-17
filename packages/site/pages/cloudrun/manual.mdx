@@ -46,20 +46,20 @@ For the Google Cloud shell:
 
 ```bash
 wget https://hey-release.s3.us-east-2.amazonaws.com/hey_linux_amd64
-chmod +x hey_linux_amd64 && mv hey_linux_amd64 /usr/local/bin/hey
+chmod +x hey_linux_amd64 && sudo mv hey_linux_amd64 /usr/local/bin/hey
 
-# you will have a fdifferenet hostname prefix (2m3hexrmga-nn.a.run.app) in my case
+# you will have a differenet hostname prefix (2m3hexrmga-nn.a.run.app in my case)
 # 10000 requests, 100 concurrent
-./hey_linux_amd64 -n 10000 -c 100 https://time-go-2m3hexrmga-nn.a.run.app |grep 'Requests/sec'
-./hey_linux_amd64 -n 10000 -c 100 https://time-deno-2m3hexrmga-nn.a.run.app |grep 'Requests/sec'
+hey -n 10000 -c 100 https://time-go-2m3hexrmga-nn.a.run.app |grep 'Requests/sec'
+hey -n 10000 -c 100 https://time-deno-2m3hexrmga-nn.a.run.app |grep 'Requests/sec'
 ```
 
 Testing from Cloud Shell:
 
 | Service   | Requests/sec |
 | --------- | -----------: |
-| time-go   |       2627.1 |
-| time-deno |       1915.7 |
+| time-go   |       4298.4 |
+| time-deno |      13014.5 |
 
 ## DNS
 
