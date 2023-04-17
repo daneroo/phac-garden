@@ -1,0 +1,47 @@
+# Pin the patch version
+# deno images are not tagged with minors: no deno:alipine-1.31
+FROM denoland/deno:alpine-1.31.1 as build
+
+WORKDIR /app
+
+ADD . /app
+
+# Any flags passed which affect runtime behavior, such as '--unstable',
+# '--allow-*', '--v8-flags', etc. are encoded into the output executable and used
+# at runtime as if they were passed to a similar 'deno run' command.
+# 
+# The runtime flags used to execute the script must be specified at compilation time
+# In our case "--allow-net" is required to allow the server to listen on a port
+RUN deno compile --allow-net server.ts
+
+
+# Option 1: Use the same base image as the build stage
+# Which is silly because now we ha both the deno runtime, and the compile server, making the image actually bigger
+# f86a3ae577b9194394422277a4e17f8a0c414a60  ./server
+# BUT: it works
+FROM denoland/deno:alpine-1.31.1
+
+# Option 2: Use alpine (same upstream bas image as deno:alpine-*)
+# Unfortunately, this does not work
+#   *The server binary will not start*
+# exec /server: no such file or directory
+# f86a3ae577b9194394422277a4e17f8a0c414a60  ./server
+# Pin the minor version
+# FROM alpine:3.17
+
+# Note
+# Could not get distroless to work:
+# See https://github.com/GoogleContainerTools/distroless
+# Unfortunately, this does not work
+#   *The server binary will not start*
+# exec /server: no such file or directory
+# FROM gcr.io/distroless/static-debian11:nonroot
+
+COPY --from=build /app/server /server
+
+EXPOSE 8080
+
+# Note that distroless images by default do not contain a shell.
+# That means the Dockerfile ENTRYPOINT command, when defined, must be specified in vector form, 
+# to avoid the container runtime prefixing with a shell.
+ENTRYPOINT ["/server"]

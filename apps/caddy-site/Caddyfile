@@ -1,0 +1,5 @@
+# http scheme required to prevent assuming https
+http://localhost:8080 {
+    root * /usr/share/caddy
+    file_server
+}

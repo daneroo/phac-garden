@@ -1,14 +1,34 @@
 
-## Stage 1: two containers
+## Everything All at Once
 
-- One hosting a static site
-- One providing a simple service (return the current time as JSON)
+Le't build all the containers and run them locally. We will explain what we have just done subsequently.
 
 `tl;dr`: build and run everything with `docker compose`.
 
+In your terminal, run the following commands in the root of this repository (`phac-garden/`):
+
+First, let's build all the containers:
+
 ```bash
-docker compose -f compose/compose.yaml build
-docker compose -f compose/compose.yaml up
+docker compose -f deploy/compose/docker-compose.yaml build
+```
+
+To confirm that the containers are built, let's query the local docker images (and just show the ones we built, that have the name compose in them). You should get something like:
+
+```bash
+$ docker images | grep compose
+compose-caddy-site                   latest          ccb5d727b625   51 seconds ago   43.8MB
+compose-nginx-site                   latest          1424cb3bdf79   51 seconds ago   40.6MB
+compose-go-time                      latest          5a5328b75c4f   8 minutes ago    14.5MB
+compose-django-time                  latest          f2b896201f3e   2 weeks ago      918MB
+compose-deno-time                    latest          eab313dacc77   3 weeks ago      122MB
+```
+
+Now we will run all the containers:
+
+```bash
+docker compose -f deploy/compose/docker-compose.yaml up
+# Hit Ctrl-C to stop
 ```
 
 Then open your browser to:
@@ -17,7 +37,10 @@ Then open your browser to:
 - Caddy Site: <http://localhost:8081>
 - Go Time Service: <http://localhost:8082>
 - Deno Time Service: <http://localhost:8083>
-- Django Time Service: <http://localhost:8084/api/time>
+
+---
+
+## Split everything below into separate pages
 
 ### 1.1: Static site (with `nginx`)
 

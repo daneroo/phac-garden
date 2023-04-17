@@ -1,10 +1,63 @@
 # Containers
 
+This repository already contains a few simple services we can use to build.
+
+Each of them will be packaged into a container and run locally.
+
 ## Pre-requisites
 
-- CodeSpaces
+This part of the guide can be run from GitHub Codespaces or locally (if you have docker installed).
 
-or
+import { Tab, Tabs } from "nextra-theme-docs";
+import Image from "next/image";
 
-- git
-- docker
+<Tabs items={["Locally", "CodeSpaces"]}>
+  <Tab>
+    <p>
+      To run this locally, you will need to have
+      [docker](https://docs.docker.com/get-docker/") installed. You will also
+      need the git commands.
+    </p>
+  </Tab>
+  <Tab>
+    You can navigate to [this project on
+    GitHub](https://github.com/daneroo/phac-garden) and click the "Code" button
+    and then "Create codespace on main" button to open it in GitHub Codespaces.
+    <Image
+      src="/images/open-codespaces.png"
+      alt="Open GitHub CodeSpaces"
+      width={494}
+      height={539}
+    />
+
+    That should open a web page with a running VSCode in your browser. You can
+    then open a terminal and run the commands below.
+
+
+    <Image
+      src="/images/codespaces-terminal.png"
+      alt="Open GitHub CodeSpaces"
+      width={640}
+      height={422}
+    />
+
+  </Tab>
+</Tabs>
+
+### Confirmation
+
+You can confirm these pre-requisites by running the following commands from a shell and confirming you have similar output:
+
+```bash
+$ git --version
+git version 2.40.0
+
+docker --version
+Client:
+ Cloud integration: v1.0.31
+ Version:           20.10.23
+...
+
+$ docker compose version
+Docker Compose version v2.15.1
+```

@@ -16,7 +16,7 @@ As it is a monorepo it will contain many different projects.
   - [ ] `phac-garden.r.dl.phac.alpha.canada.ca` needs a loadbalancer,...
 - [ ] CI/CD
   - GitHub Actions
-  - vercel
+  - [x] Vercel
   - cloudbuild
 - [ ] Get some logos and stuff
 - [ ] realclean target (node modules, dist, .next, etc)
