@@ -1,9 +1,12 @@
 # Using Cloud Build Triggers
 
-There is a limitation of 100 steps in a cloudbuild.yaml file.
+There is a limitation of 100 steps in a cloudbuild.yaml file,
+so we will make separate triggers and cloubuild.yaml files for each service.
 
-So we will make separate triggers and cloubuild.yaml files for each service.
+In particular because this is a monorepo, we wanted a separate triger for each service. One consequence of this
+is that any push to our main branch will trigger a build for each service, even if the service is not affected by the change.
 
+<!-- markdownlint-disable-next-line -->
 <Callout type="warning">
   Be sure to replace your PROJECT_ID environment variable in these scripts
 </Callout>
