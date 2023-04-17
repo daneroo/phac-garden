@@ -7,7 +7,7 @@ steps:
         # Fully qualified container registry image name
         "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/${_SERVICE_NAME}:${COMMIT_SHA}",
         # docker context _root
-        "app/${_SERVICE_NAME}/.",
+        "apps/${_SERVICE_NAME}/.",
       ]
   # Push the container image to Container Registry
   - name: "gcr.io/cloud-builders/docker"
