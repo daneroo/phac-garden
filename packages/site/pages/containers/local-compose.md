@@ -46,8 +46,8 @@ Then open your browser to:
 Run the following commands, then open your browser to <http://localhost:8080>
 
 ```bash
-docker compose -f compose/compose.yaml build site-nginx
-docker compose -f compose/compose.yaml up site-nginx
+docker compose -f deploy/compose/docker-compose.yaml build site-nginx
+docker compose -f deploy/compose/docker-compose.yaml up site-nginx
 ```
 
 <details><summary>Refinements</summary>
@@ -79,8 +79,8 @@ Finally make a better looking html file!
 Run the following commands, then open your browser to <http://localhost:8081>
 
 ```bash
-docker compose -f compose/compose.yaml build site-caddy
-docker compose -f compose/compose.yaml up site-caddy
+docker compose -f deploy/compose/docker-compose.yaml build site-caddy
+docker compose -f deploy/compose/docker-compose.yaml up site-caddy
 ```
 
 ### 2.1: Time service built with `go`
@@ -88,8 +88,8 @@ docker compose -f compose/compose.yaml up site-caddy
 Run the following commands, then open your browser to <http://localhost:8082>
 
 ```bash
-docker compose -f compose/compose.yaml build time-go
-docker compose -f compose/compose.yaml up time-go
+docker compose -f deploy/compose/docker-compose.yaml build time-go
+docker compose -f deploy/compose/docker-compose.yaml up time-go
 ```
 
 ### 2.2 alternate: Time service built with `deno`
@@ -105,8 +105,8 @@ deno run --allow-net time-deno/server.ts
 Run the following commands, then open your browser to <http://localhost:8083>
 
 ```bash
-docker compose -f compose/compose.yaml build time-deno
-docker compose -f compose/compose.yaml up time-deno
+docker compose -f deploy/compose/docker-compose.yaml build time-deno
+docker compose -f deploy/compose/docker-compose.yaml up time-deno
 ```
 
 ## Extras: load testing our service(s)
@@ -117,13 +117,13 @@ If you're on a Mac, or windows, see docs, there are pre-built binaries for a you
 This is for linux/CodeSpaces/Google Cloud Shell.
 
 ```bash
-wget 'https://hey-release.s3.us-east-2.amazonaws.com/hey_linux_amd64'
-chmod +x hey_linux_amd64
+wget https://hey-release.s3.us-east-2.amazonaws.com/hey_linux_amd64
+chmod +x hey_linux_amd64 && sudo mv hey_linux_amd64 /usr/local/bin/hey
 
 # load test the time-go service
 # 10000 requests, 100 concurrent
-./hey_linux_amd64 -n 10000 -c 100 http://localhost:8082
-./hey_linux_amd64 -n 10000 -c 100 http://localhost:8083
+hey -n 10000 -c 100 http://localhost:8082 | grep 'Requests/sec'
+hey -n 10000 -c 100 http://localhost:8083 | grep 'Requests/sec'
 ```
 
 ### Results

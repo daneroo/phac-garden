@@ -50,8 +50,8 @@ chmod +x hey_linux_amd64 && sudo mv hey_linux_amd64 /usr/local/bin/hey
 
 # you will have a differenet hostname prefix (2m3hexrmga-nn.a.run.app in my case)
 # 10000 requests, 100 concurrent
-hey -n 10000 -c 100 https://time-go-2m3hexrmga-nn.a.run.app |grep 'Requests/sec'
-hey -n 10000 -c 100 https://time-deno-2m3hexrmga-nn.a.run.app |grep 'Requests/sec'
+hey -n 10000 -c 100 https://time-go-2m3hexrmga-nn.a.run.app | grep 'Requests/sec'
+hey -n 10000 -c 100 https://time-deno-2m3hexrmga-nn.a.run.app | grep 'Requests/sec'
 ```
 
 Testing from Cloud Shell:
