@@ -44,7 +44,7 @@ for svc in time-go time-deno site-nginx site-caddy; do
     --repo-name=${GITHUB_REPO_NAME} \
     --repo-owner=daneroo \
     --branch-pattern="^main$" \
-    --build-config=${svc}/cloudbuild.yaml
+    --build-config=app/${svc}/cloudbuild.yaml
 done
 
 # list all existing triggers - to see if the new triggers appeared, one for each service
@@ -54,7 +54,7 @@ gcloud builds triggers list --format="table(name, createTime)" --region ${REGION
 
 # If this was only a test, you can delete all the triggers with the following command
 for svc in time-go time-deno site-nginx site-caddy; do
-  gcloud builds triggers delete --region ${REGION} ${REPO_NAME}-${svc}
+  gcloud builds triggers delete --region ${REGION} ${GITHUB_REPO_NAME}-${svc}
 done
 
 ```
