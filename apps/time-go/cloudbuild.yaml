@@ -32,7 +32,7 @@ steps:
 substitutions:
   # The must start with a "_" (_[A-Z0-9_]+)
   _ARTIFACT_REGISTRY_REPO: "garden-repo"
-  _SERVICE_NAME: "site-caddy"
+  _SERVICE_NAME: "time-go"
   _REGION: "northamerica-northeast1"
 images:
   - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/${_SERVICE_NAME}:${COMMIT_SHA}"

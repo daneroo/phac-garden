@@ -14,7 +14,7 @@ gcloud auth login
 # project name is phx-danl
 export PROJECT_ID="pdcp-cloud-009-danl"
 export REGION="northamerica-northeast1"
-export REPO_NAME="garden-repo"
+export ARTIFACT_REGISTRY_REPO_NAME="garden-repo"
 
 gcloud config set project ${PROJECT_ID}
 gcloud config set run/region ${REGION}
@@ -24,18 +24,18 @@ gcloud auth configure-docker ${REGION}-docker.pkg.dev
 # docker tag <LOCAL_IMAGE_NAME> gcr.io/<PROJECT_ID>/<IMAGE_NAME>
 
 # e.g.: Pushes should be of the form docker push HOST-NAME/PROJECT-ID/REPOSITORY/IMAGE:TAG
-docker tag compose-time-go:latest ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/time-go:latest
-docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/time-go:latest
-gcloud run deploy time-go --allow-unauthenticated --image ${REGION}-docker.pkg.dev/pdcp-cloud-009-danl/${REPO_NAME}/time-go:latest
+docker tag compose-time-go:latest ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REGISTRY_REPO_NAME}/time-go:latest
+docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REGISTRY_REPO_NAME}/time-go:latest
+gcloud run deploy time-go --allow-unauthenticated --image ${REGION}-docker.pkg.dev/pdcp-cloud-009-danl/${ARTIFACT_REGISTRY_REPO_NAME}/time-go:latest
 
 # Now, in a loop for each service; tag and push to the registry, then deploy to cloud run
 for i in time-go time-deno site-nginx site-caddy; do
   # destination tag
-  docker tag compose-$i:latest ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/$i:latest
+  docker tag compose-$i:latest ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REGISTRY_REPO_NAME}/$i:latest
   # push to registry
-  docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/$i:latest
+  docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REGISTRY_REPO_NAME}/$i:latest
   # deploy to cloud run
-  gcloud run deploy $i --allow-unauthenticated --image ${REGION}-docker.pkg.dev/pdcp-cloud-009-danl/${REPO_NAME}/$i:latest
+  gcloud run deploy $i --allow-unauthenticated --image ${REGION}-docker.pkg.dev/pdcp-cloud-009-danl/${ARTIFACT_REGISTRY_REPO_NAME}/$i:latest
 done
 ```
 

@@ -20,18 +20,18 @@ export PROJECT_ID="pdcp-cloud-009-danl"
 # Get the PROJECT_NUMBER from the PROJECT_ID
 export PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format="value(projectNumber)")
 export REGION="northamerica-northeast1"
-export REPO_NAME="garden-repo"
+export ARTIFACT_REGISTRY_REPO_NAME="garden-repo"
 
 gcloud config set project ${PROJECT_ID}
 
 # Create an artifact registry repository
-gcloud artifacts repositories create ${REPO_NAME} \
+gcloud artifacts repositories create ${ARTIFACT_REGISTRY_REPO_NAME} \
    --repository-format=docker \
    --location=${REGION} \
-   --description="${REPO_NAME}"
+   --description="${ARTIFACT_REGISTRY_REPO_NAME}"
 
 # Allow our service account to read from the registry
-gcloud artifacts repositories add-iam-policy-binding ${REPO_NAME} \
+gcloud artifacts repositories add-iam-policy-binding ${ARTIFACT_REGISTRY_REPO_NAME} \
     --location=${REGION} \
     --member=serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
     --role="roles/artifactregistry.reader"
@@ -40,7 +40,7 @@ gcloud artifacts repositories add-iam-policy-binding ${REPO_NAME} \
 Confirm the repository was created:
 
 ```bash
-gcloud artifacts repositories describe  ${REPO_NAME} --location ${REGION}
+gcloud artifacts repositories describe  ${ARTIFACT_REGISTRY_REPO_NAME} --location ${REGION}
 ```
 
 Should yeild output similar to:
