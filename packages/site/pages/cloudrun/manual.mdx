@@ -1,6 +1,10 @@
 # Deploy to GCP using bash/cli (from Cloud Shell for example)
 
-See also `im-qcic/cloudrun`
+import { Callout } from "nextra-theme-docs";
+
+<Callout type="warning">
+  Be sure to replace your PROJECT_ID environment variable in these scripts
+</Callout>
 
 ```bash
 # so we can push from a local docker registry
@@ -10,26 +14,28 @@ gcloud auth login
 # project name is phx-danl
 export PROJECT_ID="pdcp-cloud-009-danl"
 export REGION="northamerica-northeast1"
+export REPO_NAME="garden-repo"
+
 gcloud config set project ${PROJECT_ID}
 gcloud config set run/region ${REGION}
-# create an Artifact Registry repository (Console for now)
-# named it 'simple-gke-infra' put it in '${REGION}
 
+# Allow our docker client to read/write from the registry (for later)
 gcloud auth configure-docker ${REGION}-docker.pkg.dev
 # docker tag <LOCAL_IMAGE_NAME> gcr.io/<PROJECT_ID>/<IMAGE_NAME>
 
 # e.g.: Pushes should be of the form docker push HOST-NAME/PROJECT-ID/REPOSITORY/IMAGE:TAG
-docker tag compose-go-time:latest ${REGION}-docker.pkg.dev/${PROJECT_ID}/simple-gke-infra/go-time:latest
-docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/simple-gke-infra/go-time:latest
+docker tag compose-go-time:latest ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/go-time:latest
+docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/go-time:latest
+gcloud run deploy go-time --allow-unauthenticated --image ${REGION}-docker.pkg.dev/pdcp-cloud-009-danl/${REPO_NAME}/go-time:latest
 
-# Now, in a loop
-for i in django-time go-time deno-time nginx-site caddy-site; do
+# Now, in a loop for each service; tag and push to the registry, then deploy to cloud run
+for i in go-time deno-time nginx-site caddy-site; do
   # destination tag
-  docker tag compose-$i:latest ${REGION}-docker.pkg.dev/${PROJECT_ID}/simple-gke-infra/$i:latest
+  docker tag compose-$i:latest ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/$i:latest
   # push to registry
-  docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/simple-gke-infra/$i:latest
+  docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/$i:latest
   # deploy to cloud run
-  gcloud run deploy $i --allow-unauthenticated --image ${REGION}-docker.pkg.dev/pdcp-cloud-009-danl/simple-gke-infra/$i:latest
+  gcloud run deploy $i --allow-unauthenticated --image ${REGION}-docker.pkg.dev/pdcp-cloud-009-danl/${REPO_NAME}/$i:latest
 done
 ```
 

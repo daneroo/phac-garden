@@ -1,3 +1,4 @@
 {
-  "manual": "Deployed Manually"
+  "artifact-registry": "Create an Artifact Registry",
+  "manual": "Deployed Manually to Cloud Run"
 }

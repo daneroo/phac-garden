@@ -1,0 +1,64 @@
+# Create an Artifact Registry
+
+import { Callout } from "nextra-theme-docs";
+
+<Callout type="warning">
+  Be sure to replace your PROJECT_ID environment variable in these scripts
+</Callout>
+
+We will now create a repository for our docker images (OCI Images) in Artifact Registry.
+This will allow us to store our images in a private registry.
+We will use this registry to store our images for Cloud Run and later GKE.
+
+```bash
+# so we can execute gcloud commands
+gcloud auth login
+
+
+# project name is phx-danl
+export PROJECT_ID="pdcp-cloud-009-danl"
+# Get the PROJECT_NUMBER from the PROJECT_ID
+export PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format="value(projectNumber)")
+export REGION="northamerica-northeast1"
+export REPO_NAME="garden-repo"
+
+gcloud config set project ${PROJECT_ID}
+
+# Create an artifact registry repository
+gcloud artifacts repositories create ${REPO_NAME} \
+   --repository-format=docker \
+   --location=${REGION} \
+   --description="${REPO_NAME}"
+
+# Allow our service account to read from the registry
+gcloud artifacts repositories add-iam-policy-binding ${REPO_NAME} \
+    --location=${REGION} \
+    --member=serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
+    --role="roles/artifactregistry.reader"
+```
+
+Confirm the repository was created:
+
+```bash
+gcloud artifacts repositories describe  ${REPO_NAME} --location ${REGION}
+```
+
+Should yeild output similar to:
+
+```bash
+Encryption: Google-managed key
+Repository Size: 0.000MB
+createTime: '2023-04-17T17:01:06.020281Z'
+description: garden-repo
+dockerConfig: {}
+format: DOCKER
+mode: STANDARD_REPOSITORY
+name: projects/pdcp-cloud-009-danl/locations/northamerica-northeast1/repositories/garden-repo
+updateTime: '2023-04-17T17:01:06.020281Z'
+```
+
+Now allow our docker client to read/write from the registry (for later)
+
+```bash
+gcloud auth configure-docker ${REGION}-docker.pkg.dev
+```
