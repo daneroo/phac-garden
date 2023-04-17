@@ -8,7 +8,7 @@ So we will make separate triggers and cloubuild.yaml files for each service.
 ```bash
 export PROJECT_ID="pdcp-cloud-009-danl"
 export REGION="northamerica-northeast1"
-export SVC_GROUP="simple-gke-infra"
+export REPO_NAME="garden-repo"
 
 gcloud builds triggers list --region ${REGION}
 
@@ -16,18 +16,18 @@ gcloud builds triggers list --region ${REGION}
 gcloud builds triggers create github \
   --name=test-caddy-001 \
   --region ${REGION} \
-  --repo-name=simple-gke-infra \
+  --repo-name=${REPO_NAME} \
   --repo-owner=daneroo \
   --branch-pattern="^main$" \
-  --build-config=caddy-site/cloudbuild.yaml
+  --build-config=site-caddy/cloudbuild.yaml
 
 # and now delete it
 gcloud builds triggers delete --region ${REGION} test-caddy-001
 
 # Now, in a loop
-for svc in django-time go-time deno-time nginx-site caddy-site; do
+for svc in time-go time-deno site-nginx site-caddy; do
   gcloud builds triggers create github \
-    --name=${SVC_GROUP}-${svc} \
+    --name=${REPO_NAME}-${svc} \
     --region ${REGION} \
     --repo-name=simple-gke-infra \
     --repo-owner=daneroo \
@@ -36,8 +36,8 @@ for svc in django-time go-time deno-time nginx-site caddy-site; do
 done
 
 # and now delete them all
-for svc in django-time go-time deno-time nginx-site caddy-site; do
-  gcloud builds triggers delete --region ${REGION} ${SVC_GROUP}-${svc}
+for svc in time-go time-deno site-nginx site-caddy; do
+  gcloud builds triggers delete --region ${REGION} ${REPO_NAME}-${svc}
 done
 
 ```

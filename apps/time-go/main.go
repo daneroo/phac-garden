@@ -34,7 +34,7 @@ func timeAsJSONBytes(t time.Time) ([]byte, error) {
 }
 
 func main() {
-	log.Println("Starting go-time server ...")
+	log.Println("Starting time server (Go) ...")
 	http.HandleFunc("/", GetCurrentTimeAsJSON)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

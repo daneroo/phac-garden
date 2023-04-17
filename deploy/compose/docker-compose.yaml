@@ -2,48 +2,40 @@
 # build and run the container in the ../site directory
 version: "3"
 services:
-  nginx-site:
+  site-nginx:
     build:
-      context: ../../apps/nginx-site
+      context: ../../apps/site-nginx
       dockerfile: Dockerfile
 
     # map external port 8080 to internal port 8080
     ports:
       - "8080:8080"
 
-  caddy-site:
+  site-caddy:
     build:
-      context: ../../apps/caddy-site
+      context: ../../apps/site-caddy
       dockerfile: Dockerfile
 
     # map external port 8081 to internal port 8080
     ports:
       - "8081:8080"
 
-  go-time:
+  time-go:
     build:
-      context: ../../apps/go-time
+      context: ../../apps/time-go
       dockerfile: Dockerfile
 
     # map external port 8082 to internal port 8080
     ports:
       - "8082:8080"
 
-  deno-time:
+  time-deno:
     build:
-      context: ../../apps/deno-time
+      context: ../../apps/time-deno
       dockerfile: Dockerfile
 
     # map external port 8083 to internal port 8080
     ports:
       - "8083:8080"
 
-  # Replace this with a flask example
-  # django-time:
-  #   build:
-  #     context: ../../apps/django-time
-  #     dockerfile: Dockerfile
-
-  #   # map external port 8084 to internal port 8080
-  #   ports:
-  #     - "8084:8080"
+  # Add a flask example

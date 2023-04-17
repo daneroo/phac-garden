@@ -11,18 +11,19 @@ As it is a monorepo it will contain many different projects.
 
 ## TODO
 
-- [ ] deploy to cloud run (site and go-time)
-  - [ ] as http endpoint
+- [x] deploy to cloud run (site and time-go)
+  - [x] time-go
+  - [ ] site
   - [ ] `phac-garden.r.dl.phac.alpha.canada.ca` needs a loadbalancer,...
 - [ ] CI/CD
   - GitHub Actions
   - [x] Vercel
-  - cloudbuild
+  - [ ]cloudbuild
 - [ ] Get some logos and stuff
 - [ ] realclean target (node modules, dist, .next, etc)
 - [ ] Wse a docker plugin for nx <https://github.com/gperdomor/nx-tools/blob/main/packages/nx-container/README.md>
 - [ ] Deprecate and/or archive the original repositories.
-  - [simple-gke-infra Experiments with Keith (fork)](https://github.com/daneroo/simple-gke-infra)
+  - [x] [simple-gke-infra Experiments with Keith (fork)](https://github.com/daneroo/simple-gke-infra)
   - [Epicenter w/ Chris Allison (fork)](https://github.com/daneroo/phac-epi_center)
 
 ## Operation

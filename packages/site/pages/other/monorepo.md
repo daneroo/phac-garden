@@ -34,17 +34,17 @@ pnpm run dev
 
 This create an app with `build` `serve` `test` and `lint` commands.
 
-- `nx run go-time:test`
-- `nx run go-time:lint`
-- `nx run go-time:serve`
-- `nx run go-time:build`: this builds the binary into `dist/apps/go-time`
+- `nx run time-go:test`
+- `nx run time-go:lint`
+- `nx run time-go:serve`
+- `nx run time-go:build`: this builds the binary into `dist/apps/time-go`
 
 ```bash
 pnpm add -D @nx-go/nx-go
 
-nx g @nx-go/nx-go:app go-time
-cd apps/go-time
-go mod init github.com/daneroo/phac-garden/apps/go-time
+nx g @nx-go/nx-go:app time-go
+cd apps/time-go
+go mod init github.com/daneroo/phac-garden/apps/time-go
 go mod tidy
 ```
 

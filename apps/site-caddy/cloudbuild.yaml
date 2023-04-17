@@ -32,7 +32,7 @@ steps:
 substitutions:
   # The must start with a "_" (_[A-Z0-9_]+)
   _ARTIFACT_REGISTRY: "simple-gke-infra"
-  _SERVICE_NAME: "deno-time"
+  _SERVICE_NAME: "site-caddy"
   _REGION: "northamerica-northeast1"
 images:
   - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY}/${_SERVICE_NAME}:${COMMIT_SHA}"

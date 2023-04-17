@@ -17,11 +17,10 @@ To confirm that the containers are built, let's query the local docker images (a
 
 ```bash
 $ docker images | grep compose
-compose-caddy-site                   latest          ccb5d727b625   51 seconds ago   43.8MB
-compose-nginx-site                   latest          1424cb3bdf79   51 seconds ago   40.6MB
-compose-go-time                      latest          5a5328b75c4f   8 minutes ago    14.5MB
-compose-django-time                  latest          f2b896201f3e   2 weeks ago      918MB
-compose-deno-time                    latest          eab313dacc77   3 weeks ago      122MB
+compose-site-caddy                   latest          ccb5d727b625   51 seconds ago   43.8MB
+compose-site-nginx                   latest          1424cb3bdf79   51 seconds ago   40.6MB
+compose-time-go                      latest          5a5328b75c4f   8 minutes ago    14.5MB
+compose-time-deno                    latest          eab313dacc77   3 weeks ago      122MB
 ```
 
 Now we will run all the containers:
@@ -47,8 +46,8 @@ Then open your browser to:
 Run the following commands, then open your browser to <http://localhost:8080>
 
 ```bash
-docker compose -f compose/compose.yaml build nginx-site
-docker compose -f compose/compose.yaml up nginx-site
+docker compose -f compose/compose.yaml build site-nginx
+docker compose -f compose/compose.yaml up site-nginx
 ```
 
 <details><summary>Refinements</summary>
@@ -80,8 +79,8 @@ Finally make a better looking html file!
 Run the following commands, then open your browser to <http://localhost:8081>
 
 ```bash
-docker compose -f compose/compose.yaml build caddy-site
-docker compose -f compose/compose.yaml up caddy-site
+docker compose -f compose/compose.yaml build site-caddy
+docker compose -f compose/compose.yaml up site-caddy
 ```
 
 ### 2.1: Time service built with `go`
@@ -89,8 +88,8 @@ docker compose -f compose/compose.yaml up caddy-site
 Run the following commands, then open your browser to <http://localhost:8082>
 
 ```bash
-docker compose -f compose/compose.yaml build go-time
-docker compose -f compose/compose.yaml up go-time
+docker compose -f compose/compose.yaml build time-go
+docker compose -f compose/compose.yaml up time-go
 ```
 
 ### 2.2 alternate: Time service built with `deno`
@@ -99,26 +98,15 @@ Also see a specific [example in their manual for Cloud Run using Oak](https://de
 
 ```bash
 curl -fsSL https://deno.land/x/install/install.sh | sh
-cd deno-time
-deno run --allow-net deno-time/server.ts
+cd time-deno
+deno run --allow-net time-deno/server.ts
 ```
 
 Run the following commands, then open your browser to <http://localhost:8083>
 
 ```bash
-docker compose -f compose/compose.yaml build deno-time
-docker compose -f compose/compose.yaml up deno-time
-```
-
-### 2.3 alternate: Time service built with `django`
-
-Also see a specific [example in their manual for Cloud Run using Oak](https://deno.land/manual@v1.31.0/advanced/deploying_deno/google_cloud_run)
-
-Run the following commands, then open your browser to <http://localhost:8084/api/time>
-
-```bash
-docker compose -f compose/compose.yaml build django-time
-docker compose -f compose/compose.yaml up django-time
+docker compose -f compose/compose.yaml build time-deno
+docker compose -f compose/compose.yaml up time-deno
 ```
 
 ## Extras: load testing our service(s)
@@ -132,16 +120,15 @@ This is for linux/CodeSpaces/Google Cloud Shell.
 wget 'https://hey-release.s3.us-east-2.amazonaws.com/hey_linux_amd64'
 chmod +x hey_linux_amd64
 
-# load test the go-time service
+# load test the time-go service
 # 10000 requests, 100 concurrent
 ./hey_linux_amd64 -n 10000 -c 100 http://localhost:8082
 ./hey_linux_amd64 -n 10000 -c 100 http://localhost:8083
-./hey_linux_amd64 -n 10000 -c 100 http://localhost:8084/api/time
 ```
 
 ### Results
 
-This was for the go-time server, running on my local machine, with 10000 requests, 100 concurrent.
+This was for the time-go server, running on my local machine, with 10000 requests, 100 concurrent.
 
 ```txt
 Summary:
@@ -192,22 +179,20 @@ Summary:
 
 for 10000 requests, 100 concurrent
 
-| Service     | Requests/sec |
-|-------------|-------------:|
-| go-time     |      10266.3 |
-| deno-time   |       5718.9 |
-| django-time |        520.3 |
+| Service   | Requests/sec |
+|-----------|-------------:|
+| time-go   |      10266.3 |
+| time-deno |       5718.9 |
 
 ## Extras: Image Sizes
 
 ```bash
  $ docker images
 REPOSITORY            TAG       IMAGE ID       CREATED         SIZE
-compose-django-time   latest    a41f1a887396   6 minutes ago   972MB
-compose-deno-time     latest    487ae5658e6e   2 hours ago     122MB
-compose-go-time       latest    1df4880c7283   2 hours ago     14.3MB <---- Nice!
-compose-nginx-site    latest    ca03ce1b5089   2 hours ago     142MB
-compose-caddy-site    latest    acfd32b5538f   2 hours ago     46MB
+compose-time-deno     latest    487ae5658e6e   2 hours ago     122MB
+compose-time-go       latest    1df4880c7283   2 hours ago     14.3MB <---- Nice!
+compose-site-nginx    latest    ca03ce1b5089   2 hours ago     142MB
+compose-site-caddy    latest    acfd32b5538f   2 hours ago     46MB
 ```
 
 ## Extras: Security Scanning
@@ -220,7 +205,7 @@ Two methods of scanning for vulnerabilities:
 ### With docker scout
 
 ```bash
-for i in go-time deno-time django-time caddy-site nginx-site; do 
+for i in time-go time-deno site-caddy site-nginx; do 
   # output=$(docker scout cves compose-$i 2>&1 1>/dev/null)
   echo Scout scan results for $i :
   docker scout cves compose-$i 2>&1 1>/dev/null |grep -v '^Analyzing image'
@@ -228,19 +213,16 @@ done
 ```
 
 ```txt
-Scout scan results for go-time :
+Scout scan results for time-go :
     ✓ SBOM of image already cached, 19 packages indexed
     ✓ No vulnerable package detected
-Scout scan results for deno-time :
+Scout scan results for time-deno :
     ✓ SBOM of image already cached, 23 packages indexed
     ✗ Detected 1 vulnerable package with 2 vulnerabilities
-Scout scan results for django-time :
-    ✓ SBOM of image already cached, 573 packages indexed
-    ✗ Detected 36 vulnerable packages with a total of 114 vulnerabilities
-Scout scan results for caddy-site :
+Scout scan results for site-caddy :
     ✓ SBOM of image already cached, 138 packages indexed
     ✗ Detected 1 vulnerable package with 5 vulnerabilities
-Scout scan results for nginx-site :
+Scout scan results for site-nginx :
     ✓ SBOM of image already cached, 77 packages indexed
     ✓ No vulnerable package detected
 ```
@@ -251,16 +233,15 @@ Scout scan results for nginx-site :
 Install snyk: `brew tap snyk/tap; brew install snyk`
 
 ```bash
-for i in go-time deno-time django-time caddy-site nginx-site; do 
+for i in time-go time-deno site-caddy site-nginx; do 
   # docker scan $i; 
   echo Snyk scan results for $i :  $(snyk container test --json --file=$i/Dockerfile compose-$i:latest |jq -r .summary)
 done
 ```
 
 ```txt
-Scan results for go-time : No known operating system vulnerabilities
-Scan results for deno-time : 21 vulnerable dependency paths
-Scan results for django-time : 1774 vulnerable dependency paths
-Scan results for caddy-site : No known operating system vulnerabilities
-Scan results for nginx-site : No known vulnerabilities
+Scan results for time-go : No known operating system vulnerabilities
+Scan results for time-deno : 21 vulnerable dependency paths
+Scan results for site-caddy : No known operating system vulnerabilities
+Scan results for site-nginx : No known vulnerabilities
 ```

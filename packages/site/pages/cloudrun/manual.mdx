@@ -24,12 +24,12 @@ gcloud auth configure-docker ${REGION}-docker.pkg.dev
 # docker tag <LOCAL_IMAGE_NAME> gcr.io/<PROJECT_ID>/<IMAGE_NAME>
 
 # e.g.: Pushes should be of the form docker push HOST-NAME/PROJECT-ID/REPOSITORY/IMAGE:TAG
-docker tag compose-go-time:latest ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/go-time:latest
-docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/go-time:latest
-gcloud run deploy go-time --allow-unauthenticated --image ${REGION}-docker.pkg.dev/pdcp-cloud-009-danl/${REPO_NAME}/go-time:latest
+docker tag compose-time-go:latest ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/time-go:latest
+docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/time-go:latest
+gcloud run deploy time-go --allow-unauthenticated --image ${REGION}-docker.pkg.dev/pdcp-cloud-009-danl/${REPO_NAME}/time-go:latest
 
 # Now, in a loop for each service; tag and push to the registry, then deploy to cloud run
-for i in go-time deno-time nginx-site caddy-site; do
+for i in time-go time-deno site-nginx site-caddy; do
   # destination tag
   docker tag compose-$i:latest ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}/$i:latest
   # push to registry
@@ -50,23 +50,21 @@ chmod +x hey_linux_amd64 && mv hey_linux_amd64 /usr/local/bin/hey
 
 # you will have a fdifferenet hostname prefix (2m3hexrmga-nn.a.run.app) in my case
 # 10000 requests, 100 concurrent
-./hey_linux_amd64 -n 10000 -c 100 https://go-time-2m3hexrmga-nn.a.run.app |grep 'Requests/sec'
-./hey_linux_amd64 -n 10000 -c 100 https://deno-time-2m3hexrmga-nn.a.run.app |grep 'Requests/sec'
-./hey_linux_amd64 -n 10000 -c 100 https://django-time-2m3hexrmga-nn.a.run.app/api/time |grep 'Requests/sec'
+./hey_linux_amd64 -n 10000 -c 100 https://time-go-2m3hexrmga-nn.a.run.app |grep 'Requests/sec'
+./hey_linux_amd64 -n 10000 -c 100 https://time-deno-2m3hexrmga-nn.a.run.app |grep 'Requests/sec'
 ```
 
 Testing from Cloud Shell:
 
-| Service     | Requests/sec |
-| ----------- | -----------: |
-| go-time     |       2627.1 |
-| deno-time   |       1915.7 |
-| django-time |        162.1 |
+| Service   | Requests/sec |
+| --------- | -----------: |
+| time-go   |       2627.1 |
+| time-deno |       1915.7 |
 
 ## DNS
 
 After delegating my my own subdomain `dl.phac.alpha.canada.ca` to Google Cloud DNS in my own project,
-I created a `CNAME` record for each of the services pointing to `go-time-2m3hexrmga-nn.a.run.app`
+I created a `CNAME` record for each of the services pointing to `time-go-2m3hexrmga-nn.a.run.app`
 
 This would be much easier with Cloud Run domain mappings, but they are not supported in any region that we are allowed to use inside our GCP environment.
 
@@ -75,22 +73,22 @@ Traces of my failed attempt at provisioning a domain mapping:
 ```bash
 gcloud run services list
 # get the current url
-gcloud run services describe nginx-site --format="value(status.url)"
-#  returns https://nginx-site-2m3hexrmga-nn.a.run.app
+gcloud run services describe site-nginx --format="value(status.url)"
+#  returns https://site-nginx-2m3hexrmga-nn.a.run.app
 
-# create the CNAME entry: nginx-site.r.dl.phac.alpha.canada.ca
-# which point to the url above; notice the trailing dot "nginx-site-2m3hexrmga-nn.a.run.app."
+# create the CNAME entry: site-nginx.r.dl.phac.alpha.canada.ca
+# which point to the url above; notice the trailing dot "site-nginx-2m3hexrmga-nn.a.run.app."
 
 export PROJECT_ID="pdcp-cloud-009-danl"
 
 gcloud dns record-sets transaction start --zone=dl-phac-alpha-canada-ca --project=${PROJECT_ID}
-gcloud dns record-sets transaction add --zone=dl-phac-alpha-canada-ca --name=nginx-site.r.dl.phac.alpha.canada.ca. --ttl=300 --type=CNAME "nginx-site-2m3hexrmga-nn.a.run.app." --project=${PROJECT_ID}
+gcloud dns record-sets transaction add --zone=dl-phac-alpha-canada-ca --name=site-nginx.r.dl.phac.alpha.canada.ca. --ttl=300 --type=CNAME "site-nginx-2m3hexrmga-nn.a.run.app." --project=${PROJECT_ID}
 gcloud dns record-sets transaction execute --zone=dl-phac-alpha-canada-ca --project=${PROJECT_ID}
 
 # Confirm it worked
 gcloud dns record-sets list --zone=dl-phac-alpha-canada-ca --project=${PROJECT_ID}
-gcloud dns record-sets describe --zone=dl-phac-alpha-canada-ca --project=${PROJECT_ID} --type CNAME nginx-site.r.dl.phac.alpha.canada.ca
+gcloud dns record-sets describe --zone=dl-phac-alpha-canada-ca --project=${PROJECT_ID} --type CNAME site-nginx.r.dl.phac.alpha.canada.ca
 
 # Remove it
-gcloud dns record-sets delete --zone=dl-phac-alpha-canada-ca --project=${PROJECT_ID} --type CNAME nginx-site.r.dl.phac.alpha.canada.ca
+gcloud dns record-sets delete --zone=dl-phac-alpha-canada-ca --project=${PROJECT_ID} --type CNAME site-nginx.r.dl.phac.alpha.canada.ca
 ```
