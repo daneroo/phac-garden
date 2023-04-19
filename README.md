@@ -5,14 +5,14 @@ I gather my experiments here, and try to document the process as I go.
 
 As it is a monorepo it will contain many different projects.
 
-- Serverless functions (deployed to CLoud Run)
+- Serverless functions (deployed to Cloud Run)
 - Static Sites (deployed to Cloud Run)
 - Next.js site(s) (deployed to Cloud Run, and perhaps Vercel)
 
 ## TODO
 
 - [x] deploy to cloud run (site and time-go)
-  - [x] time-go
+  - [x] time-go, time-deno, site-nginx, site-caddy (fixed)
   - [ ] site
   - [ ] `phac-garden.r.dl.phac.alpha.canada.ca` needs a loadbalancer,...
 - [ ] CI/CD
