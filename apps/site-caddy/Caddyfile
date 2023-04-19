@@ -1,8 +1,0 @@
-# http scheme required to prevent assuming https
-# i.e. http://localhost:8080 { ...}
-# bare port specification seems to turn off auto_https as well
-# i.e. :8080 { ...}
-:8080 {
-    root * /usr/share/caddy
-    file_server
-}
