@@ -16,11 +16,13 @@ docker compose -f deploy/compose/docker-compose.yaml build
 To confirm that the containers are built, let's query the local docker images (and just show the ones we built, that have the name compose in them). You should get something like:
 
 ```bash
-$ docker images | grep compose
-compose-site-caddy                   latest          ccb5d727b625   51 seconds ago   43.8MB
-compose-site-nginx                   latest          1424cb3bdf79   51 seconds ago   40.6MB
-compose-time-go                      latest          5a5328b75c4f   8 minutes ago    14.5MB
-compose-time-deno                    latest          eab313dacc77   3 weeks ago      122MB
+$ docker images --filter "reference=*compose*"
+REPOSITORY            TAG       IMAGE ID       CREATED         SIZE
+compose-site-nextra   latest    4b5760cb827e   2 minutes ago   2.35GB
+compose-time-go       latest    5ecf18a59e2c   3 minutes ago   14.5MB
+compose-time-deno     latest    4bb0b015d129   3 minutes ago   122MB
+compose-site-nginx    latest    2d5dc9c5f74d   3 minutes ago   40.6MB
+compose-site-caddy    latest    c1c83efafcaa   3 minutes ago   43.8MB
 ```
 
 Now we will run all the containers:
@@ -32,10 +34,11 @@ docker compose -f deploy/compose/docker-compose.yaml up
 
 Then open your browser to:
 
-- NGinx Site: <http://localhost:8080>
-- Caddy Site: <http://localhost:8081>
-- Go Time Service: <http://localhost:8082>
-- Deno Time Service: <http://localhost:8083>
+- This Site (Nextra static) : <http://localhost:8080>
+- NGinx Site: <http://localhost:8081>
+- Caddy Site: <http://localhost:8082>
+- Go Time Service: <http://localhost:8083>
+- Deno Time Service: <http://localhost:8084>
 
 ---
 
@@ -76,7 +79,7 @@ Finally make a better looking html file!
 
 ### 1.2 alternate: Static site (with `caddy`)
 
-Run the following commands, then open your browser to <http://localhost:8081>
+Run the following commands, then open your browser to <http://localhost:8082>
 
 ```bash
 docker compose -f deploy/compose/docker-compose.yaml build site-caddy
@@ -85,7 +88,7 @@ docker compose -f deploy/compose/docker-compose.yaml up site-caddy
 
 ### 2.1: Time service built with `go`
 
-Run the following commands, then open your browser to <http://localhost:8082>
+Run the following commands, then open your browser to <http://localhost:8083>
 
 ```bash
 docker compose -f deploy/compose/docker-compose.yaml build time-go
@@ -102,7 +105,7 @@ cd time-deno
 deno run --allow-net time-deno/server.ts
 ```
 
-Run the following commands, then open your browser to <http://localhost:8083>
+Run the following commands, then open your browser to <http://localhost:8084>
 
 ```bash
 docker compose -f deploy/compose/docker-compose.yaml build time-deno
@@ -120,10 +123,10 @@ This is for linux/CodeSpaces/Google Cloud Shell.
 wget https://hey-release.s3.us-east-2.amazonaws.com/hey_linux_amd64
 chmod +x hey_linux_amd64 && sudo mv hey_linux_amd64 /usr/local/bin/hey
 
-# load test the time-go service
+# load test the time-go,time-deno service
 # 10000 requests, 100 concurrent
-hey -n 10000 -c 100 http://localhost:8082 | grep 'Requests/sec'
 hey -n 10000 -c 100 http://localhost:8083 | grep 'Requests/sec'
+hey -n 10000 -c 100 http://localhost:8084 | grep 'Requests/sec'
 ```
 
 ### Results
@@ -187,12 +190,14 @@ for 10000 requests, 100 concurrent
 ## Extras: Image Sizes
 
 ```bash
- $ docker images
+$ docker images --filter "reference=*compose*"
+$ docker images --filter "reference=*compose*"
 REPOSITORY            TAG       IMAGE ID       CREATED         SIZE
-compose-time-deno     latest    487ae5658e6e   2 hours ago     122MB
-compose-time-go       latest    1df4880c7283   2 hours ago     14.3MB <---- Nice!
-compose-site-nginx    latest    ca03ce1b5089   2 hours ago     142MB
-compose-site-caddy    latest    acfd32b5538f   2 hours ago     46MB
+compose-site-nextra   latest    4b5760cb827e   2 minutes ago   2.35GB
+compose-time-go       latest    5ecf18a59e2c   3 minutes ago   14.5MB <---- Nice!
+compose-time-deno     latest    4bb0b015d129   3 minutes ago   122MB
+compose-site-nginx    latest    2d5dc9c5f74d   3 minutes ago   40.6MB
+compose-site-caddy    latest    c1c83efafcaa   3 minutes ago   43.8MB
 ```
 
 ## Extras: Security Scanning
@@ -235,7 +240,7 @@ Install snyk: `brew tap snyk/tap; brew install snyk`
 ```bash
 for i in time-go time-deno site-caddy site-nginx; do 
   # docker scan $i; 
-  echo Snyk scan results for $i :  $(snyk container test --json --file=$i/Dockerfile compose-$i:latest |jq -r .summary)
+  echo Snyk scan results for $i :  $(snyk container test --json --file=apps/$i/Dockerfile compose-$i:latest |jq -r .summary)
 done
 ```
 

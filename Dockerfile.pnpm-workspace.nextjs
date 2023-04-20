@@ -1,0 +1,96 @@
+## Prepare workspace
+
+# FROM node:18-alpine AS workspace
+# Alpine not working with some of my deps (python3/musl??)
+# Does this matter that final image is alpine?
+FROM node:18 AS workspace
+# ARG service is here to enable the copy -rL command below
+ARG service
+WORKDIR /workspace
+
+# Should I pin pnpm version?
+RUN corepack enable && corepack prepare pnpm@latest --activate
+# Should I also set the the sore-dir for CI?
+# pnpm config set store-dir ~/.pnpm-store
+
+# pnpm fetch only requires lockfile
+COPY pnpm-lock.yaml .
+# pnpm fetch to cache all the things
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm fetch
+# RUN pnpm fetch
+
+# Copy ll the things!
+COPY . .
+RUN pnpm install --recursive --frozen-lockfile 
+
+# Build all the things with nx
+# "build": "nx run-many --target=build",
+# RUN pnpm run build
+
+# actually this could just be: nx run ${service}:build
+ARG service
+
+# temporary skip-nx-cache
+RUN pnpx nx run ${service}:build
+# RUN pnpx nx run --skip-nx-cache ${service}:build
+
+EXPOSE 8080
+ENV PORT 8080
+
+# All of these respect the PORT environment variable
+# CMD pnpm exec nx run site:start
+# CMD pnpm -F site start
+WORKDIR /workspace/packages/${service}
+# CMD pnpm start
+CMD ./node_modules/.bin/next start
+
+
+
+###################################################
+## Multistage build - with standalone output
+## Cannot get the next.js output:standalone to work; prevents us from making a small image
+###################################################
+
+
+# ## Production image, copy all the files and run next
+# # Adapted from next.js docs: https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
+
+# FROM node:18-alpine as runner
+# # FROM base AS runner
+
+# ARG service
+
+# WORKDIR /app
+
+# ENV NODE_ENV production
+# # Uncomment the following line in case you want to disable telemetry during runtime.
+# # ENV NEXT_TELEMETRY_DISABLED 1
+
+# RUN addgroup --system --gid 1001 nodejs
+# RUN adduser --system --uid 1001 nextjs
+
+# # COPY --from=workspace --chown=nextjs:nodejs /workspace/packages/${service}/.next/ ./
+
+# # NOT YET Working: output:standalone
+# # ** This assumes next.config.js: output: 'standalone' **
+# # Automatically leverage output traces to reduce image size
+# # https://nextjs.org/docs/advanced-features/output-file-tracing
+# COPY --from=workspace /workspace/packages/${service}/public ./public
+# # COPY --from=workspace --chown=nextjs:nodejs /workspace/packages/${service}/.next/standalone ./
+# COPY --from=workspace --chown=nextjs:nodejs /workspace/packages/${service}/.nextNoLinks/standalone ./
+# # COPY --from=workspace --chown=nextjs:nodejs /workspace/packages/${service}/.next/static ./.next/static
+# COPY --from=workspace --chown=nextjs:nodejs /workspace/packages/${service}/.nextNoLinks/static ./.next/static
+
+# # RUN ls -ltr /workspace/packages/${service}/.next/
+# RUN ls -ltr ./
+# RUN du -m ./
+
+# USER nextjs
+
+# EXPOSE 8080
+
+# ENV PORT 8080
+
+# # respects the PORT env var
+# CMD ["node", "server.js"]
+

@@ -19,14 +19,19 @@ As it is a monorepo it will contain many different projects.
   - [ ] site
   - [ ] `phac-garden.r.dl.phac.alpha.canada.ca` needs a loadbalancer,...
 - Dockerfile for packages/site
+  - [ ] try node:18:slim - for the site?
   - `docker build -f Dockerfile.pnpm-workspace.nextjs -t coco --build-arg service=site .`
+  - `docker build -f Dockerfile.pnpm-workspace.nextjs -t coco --no-cache --progress plain --build-arg service=site .`
+- [ ] realclean target (node modules, dist, .next, etc)
+  - `rm -rf node_modules/ packages/*/node_modules apps/*/node_modules`
+  - dist, .next, etc
+  - git ls-files -o -i --exclude-standard | xargs -I {} echo "{}"
+  - git ls-files -o -i --exclude-standard | grep -v node_modules
 - [ ] CI/CD
-  - GitHub Actions
+  - [ ] GitHub Actions - <https://pnpm.io/continuous-integration#github-actions>
   - [x] Vercel
   - [ ]cloudbuild
 - [ ] Get some logos and stuff
-- [ ] realclean target (node modules, dist, .next, etc)
-  - `rm -rf node_modules/ packages/*/node_modules apps/*/node_modules`
 - [ ] Wse a docker plugin for nx <https://github.com/gperdomor/nx-tools/blob/main/packages/nx-container/README.md>
 - [ ] Deprecate and/or archive the original repositories.
   - [x] [simple-gke-infra Experiments with Keith (fork)](https://github.com/daneroo/simple-gke-infra)
