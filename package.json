@@ -5,7 +5,9 @@
   "scripts": {
     "preinstall": "npx -y only-allow pnpm",
     "dev": "nx run site:dev",
-    "docker": "docker build -f Dockerfile.pnpm-workspace.nextjs -t coco --no-cache --progress plain --build-arg service=site .",
+    "compose": "docker compose -f deploy/compose/docker-compose.yaml",
+    "docker:nocache": "docker build -f Dockerfile.pnpm-workspace.nextjs -t coco --no-cache --progress plain --build-arg service=site .",
+    "docker": "docker build -f Dockerfile.pnpm-workspace.nextjs -t coco --progress plain --build-arg service=site .",
     "realclean": "rm -rf node_modules/ packages/*/node_modules apps/*/node_modules packages/site/.next ; echo Remaining...; git ls-files -o -i --exclude-standard",
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",

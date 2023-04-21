@@ -11,22 +11,19 @@ As it is a monorepo it will contain many different projects.
 
 ## TODO
 
-- [ ] deploy to vercel (site)
-  - remove pnpm-lock in packages/site
-  - The repository is shallow cloned, so the latest modified time will not be presented. Set the VERCEL_DEEP_CLONE=true environment variable to enable deep cloning.
+- [ ] move to packages/site to apps/site-nextra
+- [x] deploy to vercel (site)
+  - [x] remove pnpm-lock in packages/site
+  - [x] set VERCEL_DEEP_CLONE=true
+    - The repository is shallow cloned, so the latest modified time will not be presented. Set the VERCEL_DEEP_CLONE=true environment variable to enable deep cloning.
 - [x] deploy to cloud run (site and time-go)
   - [x] time-go, time-deno, site-nginx, site-caddy (fixed)
-  - [ ] site
-  - [ ] `phac-garden.r.dl.phac.alpha.canada.ca` needs a loadbalancer,...
+  - [ ] site-nextra
+  - [ ] `phac-garden.r.dl.phac.alpha.canada.ca` needs a loadbalancer,and ssl cert
 - Dockerfile for packages/site
-  - [ ] try node:18:slim - for the site?
-  - `docker build -f Dockerfile.pnpm-workspace.nextjs -t coco --build-arg service=site .`
-  - `docker build -f Dockerfile.pnpm-workspace.nextjs -t coco --no-cache --progress plain --build-arg service=site .`
-- [ ] realclean target (node modules, dist, .next, etc)
-  - `rm -rf node_modules/ packages/*/node_modules apps/*/node_modules`
-  - dist, .next, etc
-  - git ls-files -o -i --exclude-standard | xargs -I {} echo "{}"
-  - git ls-files -o -i --exclude-standard | grep -v node_modules
+  - [x] final image node:18-slim
+  - [x] remove some node_modules to trim (kludge)
+- [x] realclean target (node modules, dist, .next, etc)
 - [ ] CI/CD
   - [ ] GitHub Actions - <https://pnpm.io/continuous-integration#github-actions>
   - [x] Vercel

@@ -9,7 +9,8 @@ services:
         - service=site
       # progress: plain
       dockerfile: Dockerfile.pnpm-workspace.nextjs
-
+    # Run an init inside the container that forwards signals and reaps processes. replaces tini
+    init: true
     # map external port 8081 to internal port 8080
     ports:
       - "8080:8080"

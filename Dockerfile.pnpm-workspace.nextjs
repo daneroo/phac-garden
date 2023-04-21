@@ -15,7 +15,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # pnpm fetch only requires lockfile
 COPY pnpm-lock.yaml .
-# pnpm fetch to cache all the things
+# pnpm fetch to cache all the things - omit thhis caching if it's unstable
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm fetch
 # RUN pnpm fetch
 
@@ -30,9 +30,41 @@ RUN pnpm install --recursive --frozen-lockfile
 # actually this could just be: nx run ${service}:build
 ARG service
 
-# temporary skip-nx-cache
-RUN pnpx nx run ${service}:build
+## Build the service
+# We can build with pnpm or nx
+# The point of nx is to use the cache, which seems to be failing 
+# -option 1: build - with pnpm (safest)
+RUN pnpm -F ${service} build
+# -option 2: build - with nx : This is the one that is broken, not sure why
+# RUN pnpx nx run ${service}:build
+# -option 3: build - with nx but skip-nx-cache : this works, but what is the point if nx-cache is skipped
 # RUN pnpx nx run --skip-nx-cache ${service}:build
+
+## Trim some fat before I copy them into the next stage 
+# I know I don't need these in the final build
+# and these are just the biggest offenders
+#  for some reason: node_modules/.pnpm/@next+swc-darwin-arm64@13.0.6
+#  is not being removed - pnpm has much linking madnes!
+# RUN du -sm node_modules
+# RUN du -m node_modules/.pnpm/@next*|sort -n
+# RUN du -m node_modules/.pnpm/@next*swc*|sort -n
+# RUN du -m node_modules/.pnpm/@ne*arm64@*|sort -n
+RUN rm -rf node_modules/.pnpm/@next*swc*
+RUN rm -rf node_modules/.pnpm/@ne*arm64@*
+RUN rm -rf node_modules/.pnpm/typescript*
+# RUN du -sm node_modules
+
+## START insert new base here
+# FROM node:18-slim AS slim
+FROM node:18-slim AS slim
+ARG service
+WORKDIR /workspace
+COPY . .
+COPY --from=workspace /workspace/node_modules /workspace/node_modules
+# rm -rf ../../node_modules/.pnpm/@next+swc-linux-arm64-gnu@13.0.6/node_modules/@next/swc-linux-arm64-gnu
+COPY --from=workspace /workspace/packages/${service} /workspace/packages/${service}
+COPY --from=workspace /workspace/packages/${service}/.next /workspace/packages/${service}/.next
+## END insert new base here
 
 EXPOSE 8080
 ENV PORT 8080
