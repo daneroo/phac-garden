@@ -25,9 +25,9 @@ As it is a monorepo it will contain many different projects.
   - [x] remove some node_modules to trim (kludge)
 - [x] realclean target (node modules, dist, .next, etc)
 - [ ] CI/CD
-  - [ ] GitHub Actions - <https://pnpm.io/continuous-integration#github-actions>
   - [x] Vercel
-  - [ ]cloudbuild
+  - [-] cloudbuild - site-nextra remaining after rename to apps
+  - [ ] GitHub Actions - <https://pnpm.io/continuous-integration#github-actions>
 - [ ] Get some logos and stuff
 - [ ] Wse a docker plugin for nx <https://github.com/gperdomor/nx-tools/blob/main/packages/nx-container/README.md>
 - [ ] Deprecate and/or archive the original repositories.
