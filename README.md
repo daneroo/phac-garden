@@ -11,10 +11,12 @@ As it is a monorepo it will contain many different projects.
 
 ## TODO
 
-- [ ] move to packages/site to apps/site-nextra
+- [ ] Move to packages/site to apps/site-nextra
+- [ ] t3 app <https://create.t3.gg/en/introduction>
 - [x] deploy to vercel (site)
   - [x] remove pnpm-lock in packages/site
-  - [x] set VERCEL_DEEP_CLONE=true
+  - [ ] set VERCEL_DEEP_CLONE=true
+    - this would be to eventually use nx-affected
     - The repository is shallow cloned, so the latest modified time will not be presented. Set the VERCEL_DEEP_CLONE=true environment variable to enable deep cloning.
 - [x] deploy to cloud run (site and time-go)
   - [x] time-go, time-deno, site-nginx, site-caddy (fixed)
@@ -27,6 +29,11 @@ As it is a monorepo it will contain many different projects.
 - [ ] CI/CD
   - [x] Vercel
   - [-] cloudbuild - site-nextra remaining after rename to apps
+    - [ ] setup cloudbuild trigger as idempotent script
+  - [ ] pulumi - for infra
+    - cloud run - stretch cloudbuild, cloudsql, cloudstorage, gke, ssl, loadbalancer, vm+docker+caddy
+    - pulumi gcp cloudrun: <https://www.pulumi.com/registry/packages/gcp/how-to-guides/gcp-ts-cloudrun/>
+    - pulumi civo k8s: <https://www.civo.com/learn/kubernetes-clusters-using-the-civo-pulumi-provider>
   - [ ] GitHub Actions - <https://pnpm.io/continuous-integration#github-actions>
 - [ ] Get some logos and stuff
 - [ ] Wse a docker plugin for nx <https://github.com/gperdomor/nx-tools/blob/main/packages/nx-container/README.md>
