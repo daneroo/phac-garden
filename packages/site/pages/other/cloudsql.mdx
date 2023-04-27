@@ -1,0 +1,351 @@
+# CloudSQL
+
+This is just my notes on this tutorial:
+[Connecting to Private CloudSQL from Cloud Run](https://codelabs.developers.google.com/connecting-to-private-cloudsql-from-cloud-run)
+
+## Setup and Requirements
+
+Create project and resource related environment variables
+
+```bash
+# my values
+export PROJECT_ID="pdcp-cloud-009-danl"
+export REGION="northamerica-northeast1"
+gcloud config set project ${PROJECT_ID}
+
+# from the tutorial, adjusted
+export PROJECT_ID=$(gcloud config get-value project)
+export PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
+export PROJECT_NAME=$(gcloud projects describe $PROJECT_ID --format='value(name)')
+# export REGION=us-east1 # override from my values
+export MENU_SERVICE_NAME=menu-service
+
+export SERVERLESS_VPC_CONNECTOR=cymbalconnector
+export DB_INSTANCE_NAME=menu-catalog
+export DB_INSTANCE_PASSWORD=password123
+export DB_DATABASE=menu-db
+export DB_USER=menu-user
+export DB_PASSWORD=menupassword123
+```
+
+Clone the demo repo:
+
+```bash
+git clone https://github.com/GoogleCloudPlatform/cymbal-eats.git && cd cymbal-eats/menu-service
+```
+
+Enable the Services:
+
+```bash
+gcloud services enable \
+    sqladmin.googleapis.com \
+    run.googleapis.com \
+    vpcaccess.googleapis.com \
+    servicenetworking.googleapis.com
+```
+
+## Configure Private Access
+
+Allocate an IP address range: No network default: broken
+
+```bash
+gcloud compute addresses create google-managed-services-default \
+    --global \
+    --purpose=VPC_PEERING \
+    --prefix-length=20 \
+    --network=projects/$PROJECT_ID/global/networks/default
+```
+
+This needs to be changed, first create the network
+
+```bash
+export NETWORK_NAME=cloudsql-net-can-1
+export SUBNETWORK_NAME="cloudsql-subnet-mtl"
+export SUBNETWORK_IP_RANGE="10.1.0.0/20"
+# Creation of a network and subnet first.
+#  - Because of the constraints inside our GCP environment
+# The network:
+#  list existing networks
+gcloud compute networks list
+# create a new network - ${NETWORK_NAME}
+gcloud compute networks create ${NETWORK_NAME} \
+  --project ${PROJECT_ID} \
+  --subnet-mode custom
+#  list existing networks - see if it worked
+gcloud compute networks list
+
+# now the subnetwork
+# This will give us a subnetwork with IP addresses ranging from 10.1.0.1 to 10.1.15.254.
+# Since your cluster and services CIDRs are /17 and /22, they won't overlap with this range, assuming they use different base addresses.
+
+# list existing subnets
+gcloud compute networks subnets list
+
+gcloud compute networks subnets create ${SUBNETWORK_NAME} \
+  --project ${PROJECT_ID} \
+  --region ${REGION} \
+  --network ${NETWORK_NAME} \
+  --range ${SUBNETWORK_IP_RANGE}
+# list existing subnets - see if it worked
+gcloud compute networks subnets list
+
+## Cleanup
+# delete the subnet
+gcloud compute networks subnets list
+gcloud compute networks subnets delete ${SUBNETWORK_NAME}
+
+# delete the network
+gcloud compute networks list
+gcloud compute networks delete ${NETWORK_NAME}
+```
+
+Fixed: Allocate an IP address range on my new network
+
+```bash
+gcloud compute addresses list
+# This should have a better name?
+gcloud compute addresses create google-managed-services-default \
+    --global \
+    --purpose=VPC_PEERING \
+    --prefix-length=20 \
+    --network=${NETWORK_NAME}
+
+# Cleanup
+gcloud compute addresses delete --global google-managed-services-default
+```
+
+Create a private connection.
+
+```bash
+gcloud services vpc-peerings list --network ${NETWORK_NAME}
+
+gcloud services vpc-peerings connect \
+    --service=servicenetworking.googleapis.com \
+    --ranges=google-managed-services-default \
+    --network=${NETWORK_NAME} \
+    --project=$PROJECT_ID
+
+# Cleanup
+gcloud services vpc-peerings delete --network ${NETWORK_NAME} \
+    --service=servicenetworking.googleapis.com
+```
+
+## Create a database and user
+
+Create a Postgres Cloud SQL instance to use a private IP address.
+
+I also replace the network name with my own, and update PG version to 14
+
+```bash
+gcloud sql instances create $DB_INSTANCE_NAME \
+    --project=$PROJECT_ID \
+    --network=${NETWORK_NAME} \
+    --no-assign-ip \
+    --database-version=POSTGRES_14 \
+    --cpu=2 \
+    --memory=4GB \
+    --region=$REGION \
+    --root-password=${DB_INSTANCE_PASSWORD}
+```
+
+Add a database to the database instance.
+
+```bash
+gcloud sql databases create $DB_DATABASE --instance=$DB_INSTANCE_NAME
+```
+
+Create a SQL user
+
+```bash
+gcloud sql users create ${DB_USER} \
+    --password=$DB_PASSWORD \
+    --instance=$DB_INSTANCE_NAME
+```
+
+Store the database IP address in an environment variable.
+
+```bash
+export DB_INSTANCE_IP=$(gcloud sql instances describe $DB_INSTANCE_NAME \
+    --format=json | jq \
+    --raw-output ".ipAddresses[].ipAddress")
+echo $DB_INSTANCE_IP
+```
+
+Add the Cloud SQL Client role to Compute Engine service account
+
+```bash
+# When prompted for condition, we answered: 2- None
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
+  --role="roles/cloudsql.client"
+
+# Cleanup
+# Removing this might not be idempotent, so we'll not remove the binding
+```
+
+## Serverless VPC
+
+Create a Serverless VPC Access connector in the same VPC network as your Cloud SQL instance.
+
+I had to add the --network parameter.
+
+```bash
+gcloud compute networks vpc-access connectors create ${SERVERLESS_VPC_CONNECTOR} \
+    --region=${REGION} \
+    --network=${NETWORK_NAME} \
+    --range=10.8.0.0/28
+```
+
+## Deploying to Cloud Run
+
+This won't build locally, move to cloud shell, plus I'll have an `arm64` image
+
+Compile the application using maven
+
+```bash
+./mvnw package -DskipTests
+```
+
+Now build the image and with an existing artifact registry.
+
+```bash
+export ARTIFACT_REGISTRY_REPO_NAME="garden-repo"
+export IMAGE_NAME="${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REGISTRY_REPO_NAME}/menu-service:latest"
+docker build -f src/main/docker/Dockerfile.jvm -t ${IMAGE_NAME} .
+
+docker push "${IMAGE_NAME}"
+```
+
+Deploy Menu service:
+
+```bash
+export DB_INSTANCE_IP=$(gcloud sql instances describe $DB_INSTANCE_NAME \
+    --format=json | jq \
+    --raw-output ".ipAddresses[].ipAddress")
+
+gcloud run deploy $MENU_SERVICE_NAME \
+    --image=${IMAGE_NAME} \
+    --region $REGION \
+    --allow-unauthenticated \
+    --set-env-vars DB_USER=$DB_USER \
+    --set-env-vars DB_PASS=$DB_PASSWORD \
+    --set-env-vars DB_DATABASE=$DB_DATABASE \
+    --set-env-vars DB_HOST=$DB_INSTANCE_IP \
+    --vpc-connector $SERVERLESS_VPC_CONNECTOR \
+    --project=$PROJECT_ID \
+    --quiet
+```
+
+Store Menu service URL:
+
+```bash
+MENU_SERVICE_URL=$(gcloud run services describe menu-service \
+  --platform managed \
+  --region $REGION \
+  --format=json | jq \
+  --raw-output ".status.url")
+```
+
+Verify:
+
+```bash
+echo $MENU_SERVICE_URL
+```
+
+## Testing the service
+
+Create new menu item by sending POST request:
+
+```bash
+curl -X POST "${MENU_SERVICE_URL}/menu" \
+  -H 'Content-Type: application/json' \
+  -d '{
+       "itemImageURL": "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1587&q=80",
+       "itemName": "Curry Plate",
+       "itemPrice": 12.5,
+       "itemThumbnailURL": "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1587&q=80",
+       "spiceLevel": 3,
+       "status": "Ready",
+       "tagLine": "Spicy touch for your taste buds!!"
+   }'
+```
+
+Change status for menu item by sending PUT request:
+
+```bash
+curl -X PUT "${MENU_SERVICE_URL}/menu/1" \
+  -H 'Content-Type: application/json' \
+  -d '{"status": "Ready"}'
+```
+
+Mine: Get the list of items
+
+```bash
+curl -s "${MENU_SERVICE_URL}/menu" | jq
+hey "${MENU_SERVICE_URL}/menu"
+hey -n 10000 -c 100 "${MENU_SERVICE_URL}/menu" | grep 'Requests/sec'
+# get the first item
+curl -s "${MENU_SERVICE_URL}/menu/1" | jq
+hey "${MENU_SERVICE_URL}/menu/1"
+hey -n 10000 -c 100 "${MENU_SERVICE_URL}/menu" | grep 'Requests/sec'
+
+# k6
+k6 run --vus 10 --duration 30s k6-script.js
+docker run --rm -i grafana/k6 run --vus 10 --duration 30s - < k6-script.js
+```
+
+With
+
+```js k6-script.js
+import http from "k6/http";
+import { sleep } from "k6";
+
+export default function () {
+  http.get("https://menu-service-2m3hexrmga-nn.a.run.app/menu");
+}
+```
+
+## Cleanup
+
+For all of these, show the command to list the resaource, then delete it.
+This is so you can confirm the deletion
+
+```bash
+# delete cloud run service
+gcloud run services list
+gcloud run services delete menu-service --region $REGION
+
+# delete registry for garden-repo/menu-service (manually)
+
+# Serverless VPC COnnector
+gcloud compute networks vpc-access connectors list --region=${REGION}
+gcloud compute networks vpc-access connectors delete --region=${REGION} cymbalconnector
+
+# NOT removing the IAM policy binding (may not be idempotent)
+# --member="serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com"
+# --role="roles/cloudsql.client"
+
+# delete the sql instance
+gcloud sql instances list
+gcloud sql instances delete $DB_INSTANCE_NAME
+
+# delete the vpc pairing
+#  This delettion was failing for a while
+#  because GCP thought that CloudSQL was still using the peering
+# I ended up deleting it from the console
+gcloud services vpc-peerings list --network ${NETWORK_NAME}
+gcloud services vpc-peerings delete --network ${NETWORK_NAME} \
+    --service=servicenetworking.googleapis.com
+
+# delete the IP address range
+gcloud compute addresses list
+gcloud compute addresses delete --global google-managed-services-default
+
+# delete the subnet
+gcloud compute networks subnets list
+gcloud compute networks subnets delete ${SUBNETWORK_NAME} --region ${REGION}
+
+# delete the network
+gcloud compute networks list
+gcloud compute networks delete ${NETWORK_NAME}
+```
