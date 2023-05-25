@@ -20,10 +20,8 @@ const config: DocsThemeConfig = {
   project: {
     link: 'https://github.com/daneroo/phac-garden',
   },
-  // chat: {
-  //   link: 'https://discord.com',
-  // },
-  // docsRepositoryBase: 'https://github.com/shuding/nextra-docs-template',
+  // careful when we move to apps/
+  // docsRepositoryBase: 'https://github.com/daneroo/phac-garden/tree/main/packages/site',
   footer: {
     text: 'PHAC Garden Docs',
   },

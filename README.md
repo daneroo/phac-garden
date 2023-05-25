@@ -62,4 +62,8 @@ As Nx is based on [Node.js](https://nodejs.org/en) we have chosen [pnpm](https:/
 
 ## Infra and CI/CD
 
-We will use a combination of GitHub Actions, GCP `gcloud` command and GCP Cloud Build.
+We will use a combination of GitHub Actions, GCP `gcloud` command, GCP Cloud Build, and finally Config Connector
+
+## References
+
+- https://cloud.google.com/anthos-config-management/docs/tutorials/manage-resources-config-controller#cloud-shell
