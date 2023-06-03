@@ -1,47 +1,83 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as gcp from "@pulumi/gcp";
 
-// Create a GCP storage bucket
-const bucket = new gcp.storage.Bucket("my-bucket", {
-  name: "mybucket.dl.phac.alpha.canada.ca",
-  location: "northamerica-northeast1",
-  uniformBucketLevelAccess: true, // Enable Uniform Bucket-Level Access
-  website: {
-    mainPageSuffix: "index.html",
-  },
+const config = new pulumi.Config("gcp");
+const projectId = config.require("project");
+const region = config.require("region");
+const serviceName = "time-deno";
+const domain = "safe-time-deno.dl.phac.alpha.canada.ca";
+
+// Get the existing Cloud Run service details.
+let cloudRunService = gcp.cloudrun.getService({
+  name: serviceName,
+  location: region,
 });
 
-// Create a GCP bucket object to upload the HTML file into the GCP storage bucket
-const htmlFile = new gcp.storage.BucketObject("index-html", {
-  name: "index.html",
-  content:
-    "<><><title>Hello World</title></head><body><h1>Hello World!</h1></body></html>",
-  contentType: "text/html",
-  bucket: bucket.name,
-});
+// Log the Cloud Run service details.
+// cloudRunService.then((service) => {
+//   pulumi.log.info(`Cloud Run service URL: service.statuses[0].url}`);
+// });
 
-// Create a managed ssl certificate for https
-const sslCert = new gcp.compute.ManagedSslCertificate("managed-ssl-cert", {
+const certificate = new gcp.compute.ManagedSslCertificate("my-certificate", {
   managed: {
-    domains: ["mybucket.dl.phac.alpha.canada.ca"], // your domain here
+    domains: [domain],
   },
 });
 
-// Create a backend bucket
-const backendBucket = new gcp.compute.BackendBucket("backend-bucket", {
-  bucketName: bucket.name,
-  enableCdn: true,
+// Create a Serverless Region Network Endpoint Group (NEG).
+const neg = new gcp.compute.RegionNetworkEndpointGroup("my-neg", {
+  region: region,
+  networkEndpointType: "SERVERLESS",
+  cloudRun: {
+    service: serviceName,
+  },
 });
 
-// Create the load balancer to redirect traffic from HTTPS to the backend bucket
-const globalForwardingRule = new gcp.compute.GlobalForwardingRule(
-  "global-forwarding-rule",
+// Create a Load Balancer backend.
+const backend = new gcp.compute.BackendService("my-backend", {
+  portName: "http",
+  protocol: "HTTP",
+  connectionDrainingTimeoutSec: 300,
+  backends: [
+    {
+      group: neg.selfLink,
+    },
+  ],
+});
+
+// Create a URL map.
+const urlMap = new gcp.compute.URLMap("my-url-map", {
+  defaultService: backend.selfLink,
+});
+
+// Create a target HTTPS proxy.
+const targetHttpsProxy = new gcp.compute.TargetHttpsProxy("my-https-proxy", {
+  urlMap: urlMap.selfLink,
+  sslCertificates: [certificate.id],
+});
+
+const forwardingRule = new gcp.compute.GlobalForwardingRule(
+  "my-forwarding-rule",
   {
-    target: pulumi.interpolate`${backendBucket.selfLink}`,
-    portRange: "80",
-    ipAddress: "0.0.0.0",
+    target: targetHttpsProxy.selfLink,
+    portRange: "443",
   }
 );
 
-// Export resources
-export const bucketUrl = pulumi.interpolate`https://${globalForwardingRule.selfLink}`;
+// Get the existing managed zone details.
+// to get the id:
+//  gcloud dns managed-zones describe dl-phac-alpha-canada-ca
+const dlPhacAlphaExistingManagedZone = gcp.dns.ManagedZone.get(
+  "dl-phac-alpha-canada-ca",
+  "5975330339948395253"
+);
+
+// Create a DNS record.
+let dnsRecord = new gcp.dns.RecordSet("my-dns-record", {
+  // domain, with a trailing "."
+  name: `${domain}.`,
+  managedZone: dlPhacAlphaExistingManagedZone.name,
+  type: "A",
+  ttl: 300,
+  rrdatas: [forwardingRule.ipAddress],
+});

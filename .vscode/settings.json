@@ -6,6 +6,7 @@
     "cloudrun",
     "DSCO",
     "Nextra",
-    "realclean"
+    "realclean",
+    "rrdatas"
   ]
 }
