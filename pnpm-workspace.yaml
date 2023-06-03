@@ -1,9 +1,11 @@
 packages:
   # apps: direct subdirectories of apps/
-  - 'apps/*'
+  - "apps/*"
   # packages: direct subdirectories of packages/
-  - 'packages/*'
+  - "packages/*"
   # all packages in subdirectories of components/
   # - "components/**"
   # exclude packages that are inside test directories
   # - "!**/test/**"
+  # Pulumi Typescript project
+  - deploy/pulumi-cloudrun
