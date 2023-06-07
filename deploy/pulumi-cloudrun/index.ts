@@ -5,7 +5,7 @@ const config = new pulumi.Config("gcp");
 const projectId = config.require("project");
 const region = config.require("region");
 const serviceName = "time-deno";
-const domain = "safe-time-deno.dl.phac.alpha.canada.ca";
+const domain = "time-deno.garden.dl.phac.alpha.canada.ca";
 
 // Get the existing Cloud Run service details.
 let cloudRunService = gcp.cloudrun.getService({
@@ -18,14 +18,17 @@ let cloudRunService = gcp.cloudrun.getService({
 //   pulumi.log.info(`Cloud Run service URL: service.statuses[0].url}`);
 // });
 
-const certificate = new gcp.compute.ManagedSslCertificate("my-certificate", {
-  managed: {
-    domains: [domain],
-  },
-});
+const certificate = new gcp.compute.ManagedSslCertificate(
+  "phac-garden-certificate",
+  {
+    managed: {
+      domains: [domain],
+    },
+  }
+);
 
 // Create a Serverless Region Network Endpoint Group (NEG).
-const neg = new gcp.compute.RegionNetworkEndpointGroup("my-neg", {
+const neg = new gcp.compute.RegionNetworkEndpointGroup("phac-garden-neg", {
   region: region,
   networkEndpointType: "SERVERLESS",
   cloudRun: {
@@ -34,7 +37,7 @@ const neg = new gcp.compute.RegionNetworkEndpointGroup("my-neg", {
 });
 
 // Create a Load Balancer backend.
-const backend = new gcp.compute.BackendService("my-backend", {
+const backend = new gcp.compute.BackendService("phac-garden-backend", {
   portName: "http",
   protocol: "HTTP",
   connectionDrainingTimeoutSec: 300,
@@ -46,18 +49,21 @@ const backend = new gcp.compute.BackendService("my-backend", {
 });
 
 // Create a URL map.
-const urlMap = new gcp.compute.URLMap("my-url-map", {
+const urlMap = new gcp.compute.URLMap("phac-garden-url-map", {
   defaultService: backend.selfLink,
 });
 
 // Create a target HTTPS proxy.
-const targetHttpsProxy = new gcp.compute.TargetHttpsProxy("my-https-proxy", {
-  urlMap: urlMap.selfLink,
-  sslCertificates: [certificate.id],
-});
+const targetHttpsProxy = new gcp.compute.TargetHttpsProxy(
+  "phac-garden-https-proxy",
+  {
+    urlMap: urlMap.selfLink,
+    sslCertificates: [certificate.id],
+  }
+);
 
 const forwardingRule = new gcp.compute.GlobalForwardingRule(
-  "my-forwarding-rule",
+  "phac-garden-forwarding-rule",
   {
     target: targetHttpsProxy.selfLink,
     portRange: "443",
@@ -73,7 +79,7 @@ const dlPhacAlphaExistingManagedZone = gcp.dns.ManagedZone.get(
 );
 
 // Create a DNS record.
-let dnsRecord = new gcp.dns.RecordSet("my-dns-record", {
+let dnsRecord = new gcp.dns.RecordSet("phac-garden-dns-record", {
   // domain, with a trailing "."
   name: `${domain}.`,
   managedZone: dlPhacAlphaExistingManagedZone.name,

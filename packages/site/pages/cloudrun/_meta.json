@@ -1,4 +1,5 @@
 {
   "artifact-registry": "Create an Artifact Registry",
-  "manual": "Deployed Manually to Cloud Run"
+  "manual": "Deployed Manually to Cloud Run",
+  "custom-domain": "Custom Domain & SSL"
 }
