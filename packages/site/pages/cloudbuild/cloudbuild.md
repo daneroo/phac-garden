@@ -27,6 +27,7 @@ gcloud builds triggers create github \
   --region ${REGION} \
   --repo-name=${GITHUB_REPO_NAME} \
   --repo-owner=daneroo \
+  --include-logs-with-status \
   --branch-pattern="^main$" \
   --build-config=apps/site-nginx/cloudbuild.yaml
 
@@ -46,6 +47,7 @@ for svc in time-go time-deno site-nginx site-caddy; do
     --region ${REGION} \
     --repo-name=${GITHUB_REPO_NAME} \
     --repo-owner=daneroo \
+    --include-logs-with-status \
     --branch-pattern="^main$" \
     --build-config=apps/${svc}/cloudbuild.yaml
 done
