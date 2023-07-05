@@ -5,10 +5,15 @@
     "cloudbuild",
     "cloudrun",
     "Crossplane",
+    "danl",
     "DSCO",
+    "gserviceaccount",
     "Nextra",
+    "pdcp",
     "Quickstart",
     "realclean",
-    "rrdatas"
+    "rrdatas",
+    "Upbound",
+    "xpkg"
   ]
 }

@@ -6,7 +6,7 @@ on a local Kubernetes (kind) cluster.
 
 These are docs for the [Upbound Maintained GCP Provider](https://marketplace.upbound.io/providers/upbound/provider-family-gcp/v0.34.0)
 
-And this is apointer to the [VSCode Plugun for Upbound Resources](https://marketplace.visualstudio.com/items?itemName=Upboundio.upbound)
+And this is a pointer to the [VSCode Plugin for Upbound Resources](https://marketplace.visualstudio.com/items?itemName=Upboundio.upbound)
 
 ## Bootstrapping
 
@@ -15,6 +15,10 @@ We will be using [kind (homebrew)](https://kind.sigs.k8s.io/docs/user/quick-star
 
 ```bash
 brew install kind
+# we may also use these two packages for editor support
+brew install upbound/tap/up
+brew install upbound/tap/docker-credential-up
+
 
 kind create cluster --name crossplane-quickstart --wait 5m
 
