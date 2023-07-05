@@ -76,12 +76,16 @@ export PROJECT_ID="pdcp-cloud-009-danl"
 export SA_NAME="crossplane-sa"
 
 # Create the Service Account:
-gcloud iam service-accounts create ${SA_NAME} --project=${PROJECT_ID}
+gcloud iam service-accounts create ${SA_NAME} \
+    --display-name="Crossplane Service Account" \
+    --project=${PROJECT_ID}
+
 
 # Assign Roles to the Service Account:
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member="serviceAccount:${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
-  --role="roles/storage.admin"
+  --role="roles/storage.admin" \
+  --condition=None
 
 # Generate a JSON Key for the Service Account (and save it to a local file: gcp-credentials.json)
 gcloud iam service-accounts keys create gcp-credentials.json \
@@ -130,6 +134,10 @@ spec:
       name: gcp-secret
       key: creds
 EOF
+
+# Show the ProviderConfig
+kubectl get ProviderConfig default -n crossplane-system
+
 ```
 
 ## Creating a GCP Bucket
@@ -158,21 +166,6 @@ kubectl describe bucket
 
 # delete the bucket
 kubectl delete bucket --selector docs.crossplane.io/example=provider-gcp
-```
-
-### Debug
-
-I had to add an IAM role to the service account to get this to work.
-
-```bash
-export PROJECT_ID="pdcp-cloud-009-danl"
-export SA_NAME="crossplane-sa"
-
-gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-  --member='serviceAccount:crossplane-sa@pdcp-cloud-009-danl.iam.gserviceaccount.com' \
-  --role='roles/storage.admin'
-
-gcloud projects get-iam-policy ${PROJECT_ID} --flatten="bindings[].members" --format='table(bindings.role)' --filter="bindings.members:crossplane-sa@pdcp-cloud-009-danl.iam.gserviceaccount.com"
 ```
 
 ## Teardown
@@ -244,4 +237,7 @@ done
 gcloud iam service-accounts list --filter="email=${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 # Delete the GCP service account
 gcloud iam service-accounts delete ${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com --quiet
+
+# Delete the local credentials file
+rm gcp-credentials.json
 ```
