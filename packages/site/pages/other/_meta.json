@@ -3,6 +3,7 @@
   "gcp-compute": "GCP Compute",
   "gke": "GKE",
   "cue": "CUE",
+  "crossplane": "Crossplane",
   "project-logo": "Project Logo",
   "monorepo": "Monorepo",
   "deploy-vercel": "Deploy to Vercel"

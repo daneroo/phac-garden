@@ -1,0 +1,247 @@
+# Crossplane Quickstart
+
+These are my notes to replicate
+the [Crossplane Quickstart for GCP](https://docs.crossplane.io/latest/getting-started/provider-gcp/)
+on a local Kubernetes (kind) cluster.
+
+These are docs for the [Upbound Maintained GCP Provider](https://marketplace.upbound.io/providers/upbound/provider-family-gcp/v0.34.0)
+
+And this is apointer to the [VSCode Plugun for Upbound Resources](https://marketplace.visualstudio.com/items?itemName=Upboundio.upbound)
+
+## Bootstrapping
+
+We need an initial k8s cluster to bootstrap Crossplane.
+We will be using [kind (homebrew)](https://kind.sigs.k8s.io/docs/user/quick-start/#installing-with-a-package-manager)
+
+```bash
+brew install kind
+
+kind create cluster --name crossplane-quickstart --wait 5m
+
+# check the cluster is up
+kind get clusters
+# should output
+#  crossplane-quickstart
+
+# check the cluster is accessible
+kubectl cluster-info --context kind-crossplane-quickstart
+# should output similar to:
+# Kubernetes control plane is running at https://127.0.0.1:60218
+# CoreDNS is running at https://127.0.0.1:60218/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+# check the nodes are up
+kubectl get nodes
+# should output similar to:
+# NAME                                  STATUS   ROLES           AGE     VERSION
+# crossplane-quickstart-control-plane   Ready    control-plane   5m32s   v1.27.3
+
+
+# tear down:
+kind delete cluster --name crossplane-quickstart
+```
+
+## Installing Crossplane
+
+For this we need helm. (`brew install helm`)
+
+```bash
+# Enable the Crossplane Helm Chart repository:
+helm repo add crossplane-stable https://charts.crossplane.io/stable && helm repo update
+
+# Run the Helm dry-run to see all the Crossplane components Helm installs.
+helm install crossplane \
+crossplane-stable/crossplane \
+--dry-run --debug \
+--namespace crossplane-system \
+--create-namespace
+
+# Install the Crossplane components using helm install.
+helm install crossplane \
+crossplane-stable/crossplane \
+--namespace crossplane-system \
+--create-namespace
+
+# Verify Crossplane installed with kubectl get pods.
+kubectl get pods -n crossplane-system
+
+# Installing Crossplane creates new Kubernetes API end-points:
+kubectl api-resources  | grep crossplane
+```
+
+## Creating a GCP Service Account
+
+```bash
+# Set the PROJECT_ID and SA_NAME environment variables:
+export PROJECT_ID="pdcp-cloud-009-danl"
+export SA_NAME="crossplane-sa"
+
+# Create the Service Account:
+gcloud iam service-accounts create ${SA_NAME} --project=${PROJECT_ID}
+
+# Assign Roles to the Service Account:
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member="serviceAccount:${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role="roles/storage.admin"
+
+# Generate a JSON Key for the Service Account (and save it to a local file: gcp-credentials.json)
+gcloud iam service-accounts keys create gcp-credentials.json \
+    --iam-account=${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com
+```
+
+## Installing the GCP Provider
+
+```bash
+# Install the provider into the Kubernetes cluster with a Kubernetes configuration file.
+cat <<EOF | kubectl apply -f -
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: upbound-provider-gcp
+spec:
+  package: xpkg.upbound.io/upbound/provider-gcp:v0.28.0
+EOF
+
+# Verify the provider installed with kubectl get providers
+kubectl get providers
+
+# Create a Kubernetes secret with the GCP credentials
+# We saved those credentials in a local file in the previous step (gcp-credentials.json)
+kubectl create secret \
+generic gcp-secret \
+-n crossplane-system \
+--from-file=creds=./gcp-credentials.json
+
+# View the secret with kubectl describe secret
+kubectl describe secret gcp-secret -n crossplane-system
+
+# Create a ProviderConfig
+# make sure your $PROJECT_ID is set
+cat <<EOF | kubectl apply -f -
+apiVersion: gcp.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: default
+spec:
+  projectID: ${PROJECT_ID}
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: gcp-secret
+      key: creds
+EOF
+```
+
+## Creating a GCP Bucket
+
+```bash
+# Create a managed resource (GCP storage bucket) with Crossplane
+export REGION="northamerica-northeast1"
+cat <<EOF | kubectl create -f -
+apiVersion: storage.gcp.upbound.io/v1beta1
+kind: Bucket
+metadata:
+  generateName: crossplane-bucket-
+  labels:
+    docs.crossplane.io/example: provider-gcp
+spec:
+  forProvider:
+    location: ${REGION}
+    uniformBucketLevelAccess: true
+  providerConfigRef:
+    name: default
+EOF
+
+# get the bucket
+kubectl get bucket
+kubectl describe bucket
+
+# delete the bucket
+kubectl delete bucket --selector docs.crossplane.io/example=provider-gcp
+```
+
+### Debug
+
+I had to add an IAM role to the service account to get this to work.
+
+```bash
+export PROJECT_ID="pdcp-cloud-009-danl"
+export SA_NAME="crossplane-sa"
+
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --member='serviceAccount:crossplane-sa@pdcp-cloud-009-danl.iam.gserviceaccount.com' \
+  --role='roles/storage.admin'
+
+gcloud projects get-iam-policy ${PROJECT_ID} --flatten="bindings[].members" --format='table(bindings.role)' --filter="bindings.members:crossplane-sa@pdcp-cloud-009-danl.iam.gserviceaccount.com"
+```
+
+## Teardown
+
+In reverse order:
+
+```bash
+# Set the environment variables
+export PROJECT_ID="pdcp-cloud-009-danl"
+export SA_NAME="crossplane-sa"
+
+
+# Show the managed resources
+kubectl get managed
+
+# delete the bucket
+kubectl delete bucket --selector docs.crossplane.io/example=provider-gcp
+
+# Show the ProviderConfig
+kubectl get ProviderConfig default -n crossplane-system
+# Delete the ProviderConfig
+kubectl delete ProviderConfig default -n crossplane-system
+
+# Show the secret
+kubectl get secret gcp-secret -n crossplane-system
+# Delete the secret
+kubectl delete secret gcp-secret -n crossplane-system
+
+# Show the Provider
+kubectl get Provider upbound-provider-gcp -n crossplane-system
+# Delete the Provider
+kubectl delete Provider upbound-provider-gcp -n crossplane-system
+
+# Show the Crossplane helm installation
+helm list -n crossplane-system
+# Show the Crossplane helm status
+helm status crossplane -n crossplane-system
+# Delete the Crossplane helm installation
+helm uninstall crossplane -n crossplane-system
+
+# Show the help repos
+helm repo list
+# Delete the Crossplane helm repo
+helm repo remove crossplane-stable
+
+# Show the kind cluster
+kind get clusters
+# delete the kind cluster
+kind delete cluster --name crossplane-quickstart
+
+
+# Show the IAM policy bindings
+gcloud projects get-iam-policy ${PROJECT_ID} --flatten="bindings[].members" --format='table(bindings.role)' --filter="bindings.members:crossplane-sa@${PROJECT_ID}.iam.gserviceaccount.com"
+# Remove the IAM policy binding
+gcloud projects remove-iam-policy-binding ${PROJECT_ID} \
+  --member="serviceAccount:${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role="roles/storage.admin"
+
+
+# Show the GCP service account (user managed) keys
+gcloud iam service-accounts keys list --iam-account=${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com --filter='keyType=USER_MANAGED'
+# Delete the GCP service account keys
+for KEY_ID in $(gcloud iam service-accounts keys list --iam-account=${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com --format="get(name)" --filter='keyType=USER_MANAGED'); do
+    echo "Deleting key: $KEY_ID"
+    gcloud iam service-accounts keys delete $KEY_ID --iam-account=${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com --quiet
+done
+
+# Show the GCP service account
+gcloud iam service-accounts list --filter="email=${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
+# Delete the GCP service account
+gcloud iam service-accounts delete ${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com --quiet
+```

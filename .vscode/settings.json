@@ -4,8 +4,10 @@
     "Callout",
     "cloudbuild",
     "cloudrun",
+    "Crossplane",
     "DSCO",
     "Nextra",
+    "Quickstart",
     "realclean",
     "rrdatas"
   ]
