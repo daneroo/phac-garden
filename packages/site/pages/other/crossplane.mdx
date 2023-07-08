@@ -8,6 +8,16 @@ These are docs for the [Upbound Maintained GCP Provider](https://marketplace.upb
 
 And this is a pointer to the [VSCode Plugin for Upbound Resources](https://marketplace.visualstudio.com/items?itemName=Upboundio.upbound)
 
+These have also been captured in `scripts/crossplane/`. These scripts were written to idempotent.
+
+```bash
+# run from root of repo
+./scripts/crossplane/setup.sh
+./scripts/crossplane/teardown.sh
+```
+
+The snippets below explain the steps to bring up a crossplane setup.
+
 ## Bootstrapping
 
 We need an initial k8s cluster to bootstrap Crossplane.
